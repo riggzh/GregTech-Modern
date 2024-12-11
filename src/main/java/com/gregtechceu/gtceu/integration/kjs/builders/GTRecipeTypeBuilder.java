@@ -177,7 +177,6 @@ public class GTRecipeTypeBuilder extends BuilderBase<GTRecipeType> {
         type.setSound(sound);
         type.setHasResearchSlot(hasResearchSlot);
         type.setMaxTooltips(maxTooltips);
-        type.setFuelRecipeType(isFuelRecipeType);
         type.setSmallRecipeMap(smallRecipeMap);
         type.setIconSupplier(iconSupplier);
         type.setUiBuilder(uiBuilder);

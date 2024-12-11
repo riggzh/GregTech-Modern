@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface IRecipeCapabilityHolder {
 
-    default boolean hasProxies() {
+    default boolean hasCapabilityProxies() {
         return !getCapabilitiesProxy().isEmpty();
     }
 

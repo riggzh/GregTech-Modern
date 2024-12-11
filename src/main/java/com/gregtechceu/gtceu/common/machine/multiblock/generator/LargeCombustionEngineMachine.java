@@ -11,6 +11,7 @@ import com.gregtechceu.gtceu.api.machine.MetaMachine;
 import com.gregtechceu.gtceu.api.machine.feature.ITieredMachine;
 import com.gregtechceu.gtceu.api.machine.multiblock.WorkableElectricMultiblockMachine;
 import com.gregtechceu.gtceu.api.recipe.GTRecipe;
+import com.gregtechceu.gtceu.api.recipe.RecipeHandler;
 import com.gregtechceu.gtceu.api.recipe.RecipeHelper;
 import com.gregtechceu.gtceu.api.recipe.logic.OCParams;
 import com.gregtechceu.gtceu.api.recipe.logic.OCResult;
@@ -110,7 +111,7 @@ public class LargeCombustionEngineMachine extends WorkableElectricMultiblockMach
         if (machine instanceof LargeCombustionEngineMachine engineMachine) {
             var EUt = RecipeHelper.getOutputEUt(recipe);
             // has lubricant
-            if (EUt > 0 && engineMachine.getLubricantRecipe().matchRecipe(engineMachine).isSuccess() &&
+            if (EUt > 0 && RecipeHandler.matchRecipe(engineMachine, engineMachine.getLubricantRecipe()).isSuccess() &&
                     !engineMachine.isIntakesObstructed()) {
                 var maxParallel = (int) (engineMachine.getOverclockVoltage() / EUt); // get maximum parallel
                 var parallelResult = GTRecipeModifiers.fastParallel(engineMachine, recipe, maxParallel, false);
@@ -134,7 +135,8 @@ public class LargeCombustionEngineMachine extends WorkableElectricMultiblockMach
         val totalContinuousRunningTime = recipeLogic.getTotalContinuousRunningTime();
         if ((totalContinuousRunningTime == 1 || totalContinuousRunningTime % 72 == 0)) {
             // insufficient lubricant
-            if (!getLubricantRecipe().handleRecipeIO(IO.IN, this, this.recipeLogic.getChanceCaches())) {
+            if (RecipeHandler.handleRecipeIO(IO.IN, this, getLubricantRecipe(), this.recipeLogic.getChanceCaches())
+                    .isSuccess()) {
                 recipeLogic.interruptRecipe();
                 return false;
             }
@@ -142,8 +144,9 @@ public class LargeCombustionEngineMachine extends WorkableElectricMultiblockMach
         // check boost fluid
         if ((totalContinuousRunningTime == 1 || totalContinuousRunningTime % 20 == 0) && isBoostAllowed()) {
             var boosterRecipe = getBoostRecipe();
-            this.isOxygenBoosted = boosterRecipe.matchRecipe(this).isSuccess() &&
-                    boosterRecipe.handleRecipeIO(IO.IN, this, this.recipeLogic.getChanceCaches());
+            this.isOxygenBoosted = RecipeHandler.matchRecipe(this, boosterRecipe).isSuccess() &&
+                    RecipeHandler.handleRecipeIO(IO.IN, this, boosterRecipe, this.recipeLogic.getChanceCaches())
+                            .isSuccess();
         }
         return value;
     }

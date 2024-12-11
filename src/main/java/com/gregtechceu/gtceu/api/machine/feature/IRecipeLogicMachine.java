@@ -6,6 +6,7 @@ import com.gregtechceu.gtceu.api.capability.recipe.IRecipeCapabilityHolder;
 import com.gregtechceu.gtceu.api.machine.trait.RecipeLogic;
 import com.gregtechceu.gtceu.api.recipe.GTRecipe;
 import com.gregtechceu.gtceu.api.recipe.GTRecipeType;
+import com.gregtechceu.gtceu.api.recipe.RecipeHandler;
 import com.gregtechceu.gtceu.api.recipe.logic.OCParams;
 import com.gregtechceu.gtceu.api.recipe.logic.OCResult;
 import com.gregtechceu.gtceu.config.ConfigHolder;
@@ -58,7 +59,7 @@ public interface IRecipeLogicMachine extends IRecipeCapabilityHolder, IMachineFe
     RecipeLogic getRecipeLogic();
 
     default GTRecipe fullModifyRecipe(GTRecipe recipe, @NotNull OCParams params, @NotNull OCResult result) {
-        return doModifyRecipe(recipe.trimRecipeOutputs(this.getOutputLimits()), params, result);
+        return doModifyRecipe(RecipeHandler.trimRecipeOutputs(recipe, this.getOutputLimits()), params, result);
     }
 
     /**

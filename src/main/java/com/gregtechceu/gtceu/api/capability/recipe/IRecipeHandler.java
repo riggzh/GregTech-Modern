@@ -7,7 +7,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author KilaBash
@@ -42,14 +41,6 @@ public interface IRecipeHandler<K> extends IFilteredHandler<K> {
      *         null - nothing left. handling successful/finish. you should always return null as a handling-done mark.
      */
     List<K> handleRecipeInner(IO io, GTRecipe recipe, List<K> left, @Nullable String slotName, boolean simulate);
-
-    /**
-     * Slot name, it makes sense if recipe contents specify a slot name.
-     */
-    @Nullable
-    default Set<String> getSlotNames() {
-        return null;
-    }
 
     /**
      * container size, if it has one. otherwise -1.

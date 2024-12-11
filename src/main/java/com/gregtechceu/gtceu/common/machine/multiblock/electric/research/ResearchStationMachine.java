@@ -14,6 +14,7 @@ import com.gregtechceu.gtceu.api.machine.multiblock.WorkableElectricMultiblockMa
 import com.gregtechceu.gtceu.api.machine.trait.RecipeLogic;
 import com.gregtechceu.gtceu.api.recipe.GTRecipe;
 import com.gregtechceu.gtceu.api.recipe.GTRecipeType;
+import com.gregtechceu.gtceu.api.recipe.RecipeHandler;
 
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.world.item.ItemStack;
@@ -118,14 +119,16 @@ public class ResearchStationMachine extends WorkableElectricMultiblockMachine im
         @Override
         protected Iterator<GTRecipe> searchRecipe() {
             IRecipeCapabilityHolder holder = this.machine;
-            if (!holder.hasProxies()) return null;
+            if (!holder.hasCapabilityProxies()) return null;
             var iterator = machine.getRecipeType().getLookup().getRecipeIterator(holder, recipe -> {
                 if (recipe.isFuel) return false;
-                if (!holder.hasProxies()) return false;
-                var result = recipe.matchRecipeContents(IO.IN, holder, recipe.inputs, false);
+                if (!holder.hasCapabilityProxies()) return false;
+                var result = RecipeHandler.handleRecipe(IO.IN, holder, recipe, recipe.inputs, Collections.emptyMap(),
+                        false, false);
                 if (!result.isSuccess()) return false;
                 if (recipe.hasTick()) {
-                    result = recipe.matchRecipeContents(IO.IN, holder, recipe.tickInputs, true);
+                    result = RecipeHandler.handleRecipe(IO.IN, holder, recipe, recipe.tickInputs,
+                            Collections.emptyMap(), false, false);
                     return result.isSuccess();
                 }
                 return true;
@@ -158,7 +161,9 @@ public class ResearchStationMachine extends WorkableElectricMultiblockMachine im
                     return true;
                 }
                 // skip "can fit" checks, it can always fit
-                if (modified.checkConditions(this).isSuccess() &&
+                var conditions = RecipeHandler.checkConditions(modified, this).stream().filter(v -> !v.isSuccess())
+                        .findFirst();
+                if (conditions.isEmpty() &&
                         this.matchRecipeNoOutput(modified, machine).isSuccess() &&
                         this.matchTickRecipeNoOutput(modified, machine).isSuccess()) {
                     setupRecipe(modified);
@@ -172,20 +177,22 @@ public class ResearchStationMachine extends WorkableElectricMultiblockMachine im
             return false;
         }
 
-        public GTRecipe.ActionResult matchRecipeNoOutput(GTRecipe recipe, IRecipeCapabilityHolder holder) {
-            if (!holder.hasProxies()) return GTRecipe.ActionResult.FAIL_NO_REASON;
-            var result = recipe.matchRecipeContents(IO.IN, holder, recipe.inputs, false);
-            if (!result.isSuccess()) return result;
-            return GTRecipe.ActionResult.SUCCESS;
+        public RecipeHandler.ActionResult matchRecipeNoOutput(GTRecipe recipe, IRecipeCapabilityHolder holder) {
+            if (!holder.hasCapabilityProxies()) return RecipeHandler.ActionResult
+                    .fail(() -> Component.translatable("gtceu.recipe_logic.no_capabilities"));
+            return RecipeHandler.handleRecipe(IO.IN, holder, recipe, recipe.inputs, Collections.emptyMap(), false,
+                    true);
         }
 
-        public GTRecipe.ActionResult matchTickRecipeNoOutput(GTRecipe recipe, IRecipeCapabilityHolder holder) {
+        public RecipeHandler.ActionResult matchTickRecipeNoOutput(GTRecipe recipe, IRecipeCapabilityHolder holder) {
             if (recipe.hasTick()) {
-                if (!holder.hasProxies()) return GTRecipe.ActionResult.FAIL_NO_REASON;
-                var result = recipe.matchRecipeContents(IO.IN, holder, recipe.tickInputs, true);
-                if (!result.isSuccess()) return result;
+                if (!holder.hasCapabilityProxies())
+                    return RecipeHandler.ActionResult
+                            .fail(() -> Component.translatable("gtceu.recipe_logic.no_capabilities"));
+                return RecipeHandler.handleRecipe(IO.IN, holder, recipe, recipe.tickInputs, Collections.emptyMap(),
+                        false, true);
             }
-            return GTRecipe.ActionResult.SUCCESS;
+            return RecipeHandler.ActionResult.SUCCESS;
         }
 
         @Override
@@ -195,19 +202,17 @@ public class ResearchStationMachine extends WorkableElectricMultiblockMachine im
             holder.setLocked(true);
 
             // Do RecipeLogic#setupRecipe but without any i/o
-            if (handleFuelRecipe()) {
-                if (!machine.beforeWorking(recipe)) {
-                    return;
-                }
-                recipe.preWorking(this.machine);
-
-                // do not consume inputs here, consume them on completion
-                recipeDirty = false;
-                lastRecipe = recipe;
-                setStatus(Status.WORKING);
-                progress = 0;
-                duration = recipe.duration;
+            if (!machine.beforeWorking(recipe)) {
+                return;
             }
+            RecipeHandler.preWorking(this.machine, recipe);
+
+            // do not consume inputs here, consume them on completion
+            recipeDirty = false;
+            lastRecipe = recipe;
+            setStatus(Status.WORKING);
+            progress = 0;
+            duration = recipe.duration;
         }
 
         // "replace" the items in the slots rather than outputting elsewhere
@@ -228,19 +233,19 @@ public class ResearchStationMachine extends WorkableElectricMultiblockMachine im
         }
 
         @Override
-        protected boolean handleRecipeIO(GTRecipe recipe, IO io) {
+        protected RecipeHandler.ActionResult handleRecipeIO(GTRecipe recipe, IO io) {
             if (io != IO.OUT) {
                 return super.handleRecipeIO(recipe, io);
             }
-            return true;
+            return RecipeHandler.ActionResult.SUCCESS;
         }
 
         @Override
-        protected boolean handleTickRecipeIO(GTRecipe recipe, IO io) {
+        protected RecipeHandler.ActionResult handleTickRecipeIO(GTRecipe recipe, IO io) {
             if (io != IO.OUT) {
                 return super.handleTickRecipeIO(recipe, io);
             }
-            return true;
+            return RecipeHandler.ActionResult.SUCCESS;
         }
     }
 }

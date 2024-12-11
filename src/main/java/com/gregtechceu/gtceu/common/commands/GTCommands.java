@@ -9,6 +9,7 @@ import com.gregtechceu.gtceu.api.data.worldgen.ores.OreGenerator;
 import com.gregtechceu.gtceu.api.data.worldgen.ores.OrePlacer;
 import com.gregtechceu.gtceu.api.gui.factory.GTUIEditorFactory;
 import com.gregtechceu.gtceu.api.recipe.GTRecipe;
+import com.gregtechceu.gtceu.api.recipe.RecipeHandler;
 import com.gregtechceu.gtceu.api.registry.GTRegistries;
 import com.gregtechceu.gtceu.api.registry.GTRegistry;
 import com.gregtechceu.gtceu.common.commands.arguments.GTRegistryArgument;
@@ -65,11 +66,15 @@ public class GTCommands {
                                 .executes(context -> {
                                     for (Recipe<?> recipe : context.getSource().getServer().getRecipeManager()
                                             .getRecipes()) {
-                                        if (recipe instanceof GTRecipe gtRecipe && !gtRecipe.checkRecipeValid()) {
-                                            context.getSource().sendSuccess(
-                                                    () -> Component
-                                                            .literal("recipe %s is invalid".formatted(gtRecipe.id)),
-                                                    false);
+                                        if (recipe instanceof GTRecipe gtRecipe) {
+                                            var recipeValid = RecipeHandler.checkRecipeValidity(gtRecipe).stream()
+                                                    .filter(v -> !v.isSuccess()).findAny();
+                                            if (recipeValid.isPresent()) {
+                                                context.getSource().sendSuccess(
+                                                        () -> Component
+                                                                .literal("Recipe %s is invalid".formatted(gtRecipe.id)),
+                                                        false);
+                                            }
                                         }
                                     }
                                     return 1;
