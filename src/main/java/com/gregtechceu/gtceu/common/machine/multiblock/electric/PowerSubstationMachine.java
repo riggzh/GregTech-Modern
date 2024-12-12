@@ -100,20 +100,21 @@ public class PowerSubstationMachine extends WorkableMultiblockMachine
             if (part instanceof IMaintenanceMachine maintenanceMachine) {
                 this.maintenance = maintenanceMachine;
             }
-            for (var handler : part.getRecipeHandlers()) {
-                var handlerIO = handler.getHandlerIO();
-                // If IO not compatible
-                if (io != IO.BOTH && handlerIO != IO.BOTH && io != handlerIO) continue;
-                if (handler.getCapability() == EURecipeCapability.CAP &&
-                        handler instanceof IEnergyContainer container) {
-                    if (handlerIO == IO.IN) {
-                        inputs.add(container);
-                    } else if (handlerIO == IO.OUT) {
-                        outputs.add(container);
-                    }
-                    traitSubscriptions.add(handler.addChangedListener(tickSubscription::updateSubscription));
-                }
+            var handlerList = part.getRecipeHandlers();
+            if (io != IO.BOTH && handlerList.getHandlerIO() != IO.BOTH && io != handlerList.getHandlerIO()) continue;
+
+            var containers = handlerList.getCapability(EURecipeCapability.CAP).stream()
+                    .filter(v -> v instanceof IEnergyContainer)
+                    .map(v -> (IEnergyContainer)v)
+                    .toList();
+
+            if(handlerList.getHandlerIO() == IO.IN) {
+                inputs.addAll(containers);
+            } else if(handlerList.getHandlerIO() == IO.OUT) {
+                outputs.addAll(containers);
             }
+
+            traitSubscriptions.addAll(handlerList.addChangeListeners(tickSubscription::updateSubscription));
         }
         this.inputHatches = new EnergyContainerList(inputs);
         this.outputHatches = new EnergyContainerList(outputs);

@@ -12,6 +12,7 @@ import com.gregtechceu.gtceu.api.data.tag.TagPrefix;
 import com.gregtechceu.gtceu.api.item.IGTTool;
 import com.gregtechceu.gtceu.api.item.tool.aoe.AoESymmetrical;
 import com.gregtechceu.gtceu.api.machine.trait.NotifiableItemStackHandler;
+import com.gregtechceu.gtceu.api.machine.trait.RecipeHandlerList;
 import com.gregtechceu.gtceu.api.recipe.GTRecipe;
 import com.gregtechceu.gtceu.api.recipe.RecipeHandler;
 import com.gregtechceu.gtceu.api.recipe.content.Content;
@@ -412,16 +413,14 @@ public class ToolHelper {
                 // Stack lists can be immutable going into Recipe#matches barring no rewrites
                 // Search for forge hammer recipes from all drops individually (only LV or under)
 
-                Table<IO, RecipeCapability<?>, List<IRecipeHandler<?>>> caps = Tables
-                        .newCustomTable(new EnumMap<>(IO.class), IdentityHashMap::new);
+                Map<IO, List<RecipeHandlerList>> caps = new IdentityHashMap<>();
                 DummyMachineBlockEntity be = new DummyMachineBlockEntity(GTValues.LV,
                         GTRecipeTypes.FORGE_HAMMER_RECIPES, GTMachines.defaultTankSizeFunction, caps);
-                caps.put(IO.IN, EURecipeCapability.CAP, List.of(new InfiniteEnergyContainer(be.getMetaMachine(),
+                caps.computeIfAbsent(IO.IN, i -> new ArrayList()).add(RecipeHandlerList.of(IO.IN, new InfiniteEnergyContainer(be.getMetaMachine(),
                         GTValues.V[GTValues.LV], GTValues.V[GTValues.LV], 1, GTValues.V[GTValues.LV], 1)));
-                caps.put(IO.IN, ItemRecipeCapability.CAP, List.of(new NotifiableItemStackHandler(be.getMetaMachine(), 1,
+                caps.computeIfAbsent(IO.IN, i -> new ArrayList()).add(RecipeHandlerList.of(IO.IN, new NotifiableItemStackHandler(be.getMetaMachine(), 1,
                         IO.IN, IO.IN, (slots) -> new ItemStackTransfer(silktouchDrop))));
-                caps.put(IO.OUT, ItemRecipeCapability.CAP,
-                        List.of(new NotifiableItemStackHandler(be.getMetaMachine(), 2, IO.OUT)));
+                caps.computeIfAbsent(IO.IN, i -> new ArrayList()).add(RecipeHandlerList.of(IO.IN, new NotifiableItemStackHandler(be.getMetaMachine(), 2, IO.OUT)));
                 be.getMetaMachine().reinitializeCapabilities(caps);
 
                 Iterator<GTRecipe> hammerRecipes = GTRecipeTypes.FORGE_HAMMER_RECIPES.searchRecipe(be.metaMachine,

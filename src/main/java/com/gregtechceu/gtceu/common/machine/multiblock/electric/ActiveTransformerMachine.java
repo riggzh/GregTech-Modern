@@ -92,26 +92,18 @@ public class ActiveTransformerMachine extends WorkableElectricMultiblockMachine
             var handlerList = part.getRecipeHandlers();
             if (io != IO.BOTH && handlerList.getHandlerIO() != IO.BOTH && io != handlerList.getHandlerIO()) continue;
 
-            handlerList.getCapability(EURecipeCapability.CAP).stream()
+            var containers = handlerList.getCapability(EURecipeCapability.CAP).stream()
                     .filter(v -> v instanceof IEnergyContainer)
-                    .forEach(v -> {
-                        if()
-                    });
+                    .map(v -> (IEnergyContainer)v)
+                    .toList();
 
-            for (var handler : part.getRecipeHandlers()) {
-                var handlerIO = handler.getHandlerIO();
-                // If IO not compatible
-                if (io != IO.BOTH && handlerIO != IO.BOTH && io != handlerIO) continue;
-                if (handler.getCapability() == EURecipeCapability.CAP &&
-                        handler instanceof IEnergyContainer container) {
-                    if (handlerIO == IO.IN) {
-                        powerInput.add(container);
-                    } else if (handlerIO == IO.OUT) {
-                        powerOutput.add(container);
-                    }
-                    traitSubscriptions.add(handler.addChangedListener(converterSubscription::updateSubscription));
-                }
+            if(handlerList.getHandlerIO() == IO.IN) {
+                powerInput.addAll(containers);
+            } else if(handlerList.getHandlerIO() == IO.OUT) {
+                powerOutput.addAll(containers);
             }
+
+            traitSubscriptions.addAll(handlerList.addChangeListeners(converterSubscription::updateSubscription));
         }
 
         // Invalidate the structure if there is not at least one output and one input

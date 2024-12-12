@@ -75,15 +75,18 @@ public class MEPatternBufferProxyPartMachine extends TieredIOPartMachine impleme
 
             List<NotifiableRecipeHandlerTrait<Ingredient>> itemHandlers = new ArrayList<>();
             List<NotifiableRecipeHandlerTrait<FluidIngredient>> fluidHandlers = new ArrayList<>();
-            for (var handler : machine.getRecipeHandlers()) {
-                if (handler.isProxy()) continue;
+            var handlerList = machine.getRecipeHandlers();
+            handlerList.handlerMap.forEach((cap, handlers) -> {
+                for(var handler : handlers) {
+                    if (handler.isProxy()) continue;
 
-                if (handler.getCapability() == ItemRecipeCapability.CAP) {
-                    itemHandlers.add((NotifiableRecipeHandlerTrait<Ingredient>) handler);
-                } else {
-                    fluidHandlers.add((NotifiableRecipeHandlerTrait<FluidIngredient>) handler);
+                    if (handler.getCapability() == ItemRecipeCapability.CAP) {
+                        itemHandlers.add((NotifiableRecipeHandlerTrait<Ingredient>) handler);
+                    } else {
+                        fluidHandlers.add((NotifiableRecipeHandlerTrait<FluidIngredient>) handler);
+                    }
                 }
-            }
+            });
             itemProxyHandler.setHandlers(itemHandlers);
             fluidProxyHandler.setHandlers(fluidHandlers);
 

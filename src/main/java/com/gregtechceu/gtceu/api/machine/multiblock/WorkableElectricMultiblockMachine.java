@@ -187,16 +187,16 @@ public class WorkableElectricMultiblockMachine extends WorkableMultiblockMachine
 
     public EnergyContainerList getEnergyContainer() {
         List<IEnergyContainer> containers = new ArrayList<>();
-        var capabilities = capabilitiesProxy.get(IO.IN, EURecipeCapability.CAP);
-        if (capabilities != null) {
+        var capabilities = capabilitiesProxy.get(IO.IN).stream().flatMap(rhl -> rhl.getCapability(EURecipeCapability.CAP).stream()).toList();
+        if (!capabilities.isEmpty()) {
             for (IRecipeHandler<?> handler : capabilities) {
                 if (handler instanceof IEnergyContainer container) {
                     containers.add(container);
                 }
             }
         } else {
-            capabilities = capabilitiesProxy.get(IO.OUT, EURecipeCapability.CAP);
-            if (capabilities != null) {
+            capabilities = capabilitiesProxy.get(IO.OUT).stream().flatMap(rhl -> rhl.getCapability(EURecipeCapability.CAP).stream()).toList();
+            if (!capabilities.isEmpty()) {
                 for (IRecipeHandler<?> handler : capabilities) {
                     if (handler instanceof IEnergyContainer container) {
                         containers.add(container);

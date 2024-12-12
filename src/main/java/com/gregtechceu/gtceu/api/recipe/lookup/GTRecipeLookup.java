@@ -56,24 +56,27 @@ public class GTRecipeLookup {
     protected List<List<AbstractMapIngredient>> prepareRecipeFind(@NotNull IRecipeCapabilityHolder holder) {
         // First, check if items and fluids are valid.
         int totalSize = 0;
-        for (Map.Entry<RecipeCapability<?>, List<IRecipeHandler<?>>> entries : holder.getCapabilitiesProxy().row(IO.IN)
-                .entrySet()) {
-            int size = 0;
-            if (!entries.getKey().isRecipeSearchFilter()) {
-                continue;
-            }
-            for (IRecipeHandler<?> entry : entries.getValue()) {
-                if (entry.getSize() != -1) {
-                    size += entry.getSize();
+        var recipeList = holder.getCapabilitiesProxy().get(IO.IN).stream().toList();
+
+        for(var handler : recipeList) {
+            for (Map.Entry<RecipeCapability<?>, List<IRecipeHandler<?>>> entries : handler.handlerMap.entrySet()) {
+                int size = 0;
+                if (!entries.getKey().isRecipeSearchFilter()) {
+                    continue;
                 }
+                for (IRecipeHandler<?> entry : entries.getValue()) {
+                    if (entry.getSize() != -1) {
+                        size += entry.getSize();
+                    }
+                }
+                if (size == Integer.MAX_VALUE) {
+                    return null;
+                }
+                totalSize += size;
             }
-            if (size == Integer.MAX_VALUE) {
+            if (totalSize == 0) {
                 return null;
             }
-            totalSize += size;
-        }
-        if (totalSize == 0) {
-            return null;
         }
 
         // Build input.
@@ -425,9 +428,16 @@ public class GTRecipeLookup {
     @NotNull
     protected List<List<AbstractMapIngredient>> fromHolder(@NotNull IRecipeCapabilityHolder r) {
 
-        List<List<AbstractMapIngredient>> list = new ObjectArrayList<>(
-                r.getCapabilitiesProxy().row(IO.IN).values().size());
-        r.getCapabilitiesProxy().row(IO.IN).forEach((cap, handlers) -> {
+        var recipeList = r.getCapabilitiesProxy().get(IO.IN).stream().toList();
+        int size = 0;
+        for(var handler : recipeList) {
+            for(var entry : handler.handlerMap.entrySet()) {
+                size += entry.getValue().size();
+            }
+        }
+
+        List<List<AbstractMapIngredient>> list = new ObjectArrayList<>(size);
+        r.getCapabilitiesProxy().get(IO.IN).forEach(v -> v.handlerMap.forEach((cap, handlers) -> {
             if (cap.isRecipeSearchFilter() && !handlers.isEmpty()) {
                 for (IRecipeHandler<?> handler : handlers) {
                     if (handler.isProxy()) {
@@ -439,7 +449,7 @@ public class GTRecipeLookup {
                     }
                 }
             }
-        });
+        }));
         return list;
     }
 

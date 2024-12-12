@@ -14,6 +14,7 @@ import com.gregtechceu.gtceu.api.machine.feature.IExhaustVentMachine;
 import com.gregtechceu.gtceu.api.machine.feature.IUIMachine;
 import com.gregtechceu.gtceu.api.machine.trait.NotifiableFluidTank;
 import com.gregtechceu.gtceu.api.machine.trait.NotifiableItemStackHandler;
+import com.gregtechceu.gtceu.api.machine.trait.RecipeHandlerList;
 import com.gregtechceu.gtceu.api.recipe.GTRecipe;
 import com.gregtechceu.gtceu.api.recipe.RecipeHelper;
 import com.gregtechceu.gtceu.api.recipe.logic.OCParams;
@@ -88,8 +89,8 @@ public class SimpleSteamMachine extends SteamWorkableMachine implements IExhaust
     public void onLoad() {
         super.onLoad();
         // Fine, we use it to provide eu cap for recipe, simulating an EU machine.
-        capabilitiesProxy.put(IO.IN, EURecipeCapability.CAP,
-                List.of(new SteamEnergyRecipeHandler(steamTank, FluidHelper.getBucket() / 1000d)));
+        capabilitiesProxy.computeIfAbsent(IO.IN, i -> new ArrayList<>())
+                .add(RecipeHandlerList.of(IO.IN, new SteamEnergyRecipeHandler(steamTank, FluidHelper.getBucket() / 1000d)));
     }
 
     @Override

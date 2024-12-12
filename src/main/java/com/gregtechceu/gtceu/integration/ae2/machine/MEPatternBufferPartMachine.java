@@ -1,6 +1,7 @@
 package com.gregtechceu.gtceu.integration.ae2.machine;
 
 import com.gregtechceu.gtceu.GTCEu;
+import com.gregtechceu.gtceu.api.capability.recipe.FluidRecipeCapability;
 import com.gregtechceu.gtceu.api.capability.recipe.IO;
 import com.gregtechceu.gtceu.api.capability.recipe.ItemRecipeCapability;
 import com.gregtechceu.gtceu.api.gui.GuiTextures;
@@ -14,6 +15,7 @@ import com.gregtechceu.gtceu.api.machine.fancyconfigurator.CircuitFancyConfigura
 import com.gregtechceu.gtceu.api.machine.fancyconfigurator.FancyInvConfigurator;
 import com.gregtechceu.gtceu.api.machine.fancyconfigurator.FancyTankConfigurator;
 import com.gregtechceu.gtceu.api.machine.feature.multiblock.IMultiController;
+import com.gregtechceu.gtceu.api.machine.trait.IRecipeHandlerTrait;
 import com.gregtechceu.gtceu.api.machine.trait.NotifiableFluidTank;
 import com.gregtechceu.gtceu.api.machine.trait.NotifiableItemStackHandler;
 import com.gregtechceu.gtceu.api.recipe.ingredient.FluidIngredient;
@@ -177,13 +179,16 @@ public class MEPatternBufferPartMachine extends MEBusPartMachine
                 }
             }));
         }
-        getRecipeHandlers().forEach(handler -> handler.addChangedListener(() -> getProxies().forEach(proxy -> {
-            if (handler.getCapability() == ItemRecipeCapability.CAP) {
-                proxy.itemProxyHandler.notifyListeners();
-            } else {
-                proxy.fluidProxyHandler.notifyListeners();
-            }
-        })));
+        getRecipeHandlers().handlerMap.forEach((cap,handler) -> handler.stream()
+                .filter(v -> v instanceof IRecipeHandlerTrait)
+                .forEach(u -> ((IRecipeHandlerTrait<?>) u).addChangedListener(() -> getProxies().forEach(proxy -> {
+                        if(cap == ItemRecipeCapability.CAP) {
+                            proxy.itemProxyHandler.notifyListeners();
+                        } else if(cap == FluidRecipeCapability.CAP) {
+                            proxy.fluidProxyHandler.notifyListeners();
+                        }
+                })))
+        );
     }
 
     @Override

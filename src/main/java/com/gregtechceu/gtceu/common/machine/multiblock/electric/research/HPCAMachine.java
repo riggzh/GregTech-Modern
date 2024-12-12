@@ -111,17 +111,15 @@ public class HPCAMachine extends WorkableElectricMultiblockMachine
                 this.maintenance = maintenanceMachine;
             }
             if (io == IO.NONE || io == IO.OUT) continue;
-            for (var handler : part.getRecipeHandlers()) {
-                // If IO not compatible
-                if (io != IO.BOTH && handler.getHandlerIO() != IO.BOTH && io != handler.getHandlerIO()) continue;
-                if (handler.getCapability() == EURecipeCapability.CAP &&
-                        handler instanceof IEnergyContainer container) {
-                    energyContainers.add(container);
-                } else if (handler.getCapability() == FluidRecipeCapability.CAP &&
-                        handler instanceof IFluidTransfer fluidHandler) {
-                            coolantContainers.add(fluidHandler);
-                        }
-            }
+            var handlerList = part.getRecipeHandlers();
+            if (io != IO.BOTH && handlerList.getHandlerIO() != IO.BOTH && io != handlerList.getHandlerIO()) continue;
+
+            handlerList.getCapability(EURecipeCapability.CAP).stream()
+                    .filter(v -> v instanceof IEnergyContainer)
+                    .forEach(v -> energyContainers.add((IEnergyContainer)v));
+            handlerList.getCapability(FluidRecipeCapability.CAP).stream()
+                    .filter(v -> v instanceof IFluidHandler)
+                    .forEach(v -> coolantContainers.add((IFluidHandler)v));
         }
         this.energyContainer = new EnergyContainerList(energyContainers);
         this.coolantHandler = new FluidTransferList(coolantContainers);

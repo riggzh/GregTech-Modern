@@ -6,6 +6,7 @@ import com.gregtechceu.gtceu.api.capability.recipe.IRecipeHandler;
 import com.gregtechceu.gtceu.api.capability.recipe.RecipeCapability;
 import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity;
 import com.gregtechceu.gtceu.api.machine.MachineDefinition;
+import com.gregtechceu.gtceu.api.machine.trait.RecipeHandlerList;
 import com.gregtechceu.gtceu.api.recipe.GTRecipeType;
 
 import com.lowdragmc.lowdraglib.syncdata.managed.MultiManagedStorage;
@@ -15,6 +16,7 @@ import it.unimi.dsi.fastutil.ints.Int2LongFunction;
 import lombok.Getter;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Dummy machine BE used for wrapping {@link DummyRecipeLogicMachine}s
@@ -27,7 +29,7 @@ public class DummyMachineBlockEntity implements IMachineBlockEntity {
     private final MachineDefinition definition;
 
     public DummyMachineBlockEntity(int tier, GTRecipeType type, Int2LongFunction tankScalingFunction,
-                                   Table<IO, RecipeCapability<?>, List<IRecipeHandler<?>>> capabilitiesProxy,
+                                   Map<IO, List<RecipeHandlerList>> capabilitiesProxy,
                                    Object... args) {
         this.definition = MachineDefinition.createDefinition(GTCEu.id("dummy"));
         this.definition.setRecipeTypes(new GTRecipeType[] { type });

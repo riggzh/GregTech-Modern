@@ -11,6 +11,7 @@ import com.gregtechceu.gtceu.api.machine.feature.multiblock.IDisplayUIMachine;
 import com.gregtechceu.gtceu.api.machine.multiblock.WorkableMultiblockMachine;
 import com.gregtechceu.gtceu.api.machine.steam.SteamEnergyRecipeHandler;
 import com.gregtechceu.gtceu.api.machine.trait.NotifiableFluidTank;
+import com.gregtechceu.gtceu.api.machine.trait.RecipeHandlerList;
 import com.gregtechceu.gtceu.api.recipe.GTRecipe;
 import com.gregtechceu.gtceu.api.recipe.RecipeHelper;
 import com.gregtechceu.gtceu.api.recipe.logic.OCParams;
@@ -54,19 +55,21 @@ public class SteamParallelMultiblockMachine extends WorkableMultiblockMachine im
     @Override
     public void onStructureFormed() {
         super.onStructureFormed();
-        var handlers = capabilitiesProxy.get(IO.IN, FluidRecipeCapability.CAP);
-        if (handlers == null) return;
+        var handlers = capabilitiesProxy.get(IO.IN).stream().flatMap(rhl -> rhl.getCapability(FluidRecipeCapability.CAP).stream()).toList();
+        if (handlers.isEmpty()) return;
         var itr = handlers.iterator();
         while (itr.hasNext()) {
             var handler = itr.next();
             if (handler instanceof NotifiableFluidTank tank) {
                 if (tank.isFluidValid(0, GTMaterials.Steam.getFluid(1))) {
                     itr.remove();
-                    if (!capabilitiesProxy.contains(IO.IN, EURecipeCapability.CAP)) {
+                    capabilitiesProxy.computeIfAbsent(IO.IN, c -> new ArrayList<>())
+                            .add(RecipeHandlerList.of(IO.IN, new SteamEnergyRecipeHandler(tank, CONVERSION_RATE)));
+                    /*if (!capabilitiesProxy.contains(IO.IN, EURecipeCapability.CAP)) {
                         capabilitiesProxy.put(IO.IN, EURecipeCapability.CAP, new ArrayList<>());
                     }
                     capabilitiesProxy.get(IO.IN, EURecipeCapability.CAP)
-                            .add(new SteamEnergyRecipeHandler(tank, CONVERSION_RATE));
+                            .add(new SteamEnergyRecipeHandler(tank, CONVERSION_RATE));*/
                     return;
                 }
             }
@@ -90,9 +93,8 @@ public class SteamParallelMultiblockMachine extends WorkableMultiblockMachine im
     public void addDisplayText(List<Component> textList) {
         IDisplayUIMachine.super.addDisplayText(textList);
         if (isFormed()) {
-            var handlers = capabilitiesProxy.get(IO.IN, EURecipeCapability.CAP);
-            if (handlers != null && handlers.size() > 0 &&
-                    handlers.get(0) instanceof SteamEnergyRecipeHandler steamHandler) {
+            var handlers = capabilitiesProxy.get(IO.IN).stream().flatMap(rhl -> rhl.getCapability(EURecipeCapability.CAP).stream()).toList();
+            if (!handlers.isEmpty() && handlers.get(0) instanceof SteamEnergyRecipeHandler steamHandler) {
                 if (steamHandler.getCapacity() > 0) {
                     long steamStored = steamHandler.getStored();
                     textList.add(Component.translatable("gtceu.multiblock.steam.steam_stored", steamStored,

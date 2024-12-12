@@ -69,14 +69,12 @@ public class DataBankMachine extends WorkableElectricMultiblockMachine
                 this.maintenance = maintenanceMachine;
             }
             if (io == IO.NONE || io == IO.OUT) continue;
-            for (var handler : part.getRecipeHandlers()) {
-                // If IO not compatible
-                if (io != IO.BOTH && handler.getHandlerIO() != IO.BOTH && io != handler.getHandlerIO()) continue;
-                if (handler.getCapability() == EURecipeCapability.CAP &&
-                        handler instanceof IEnergyContainer container) {
-                    energyContainers.add(container);
-                }
-            }
+            var handlerList = part.getRecipeHandlers();
+            if (io != IO.BOTH && handlerList.getHandlerIO() != IO.BOTH && io != handlerList.getHandlerIO()) continue;
+
+            handlerList.getCapability(EURecipeCapability.CAP).stream()
+                    .filter(v -> v instanceof IEnergyContainer)
+                    .forEach(v -> energyContainers.add((IEnergyContainer)v));
         }
         this.energyContainer = new EnergyContainerList(energyContainers);
         this.energyUsage = calculateEnergyUsage();
