@@ -1,9 +1,12 @@
 package com.gregtechceu.gtceu.api.capability.recipe;
 
 import com.google.common.collect.Table;
+import com.gregtechceu.gtceu.api.machine.trait.RecipeHandlerList;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public interface IRecipeCapabilityHolder {
 
@@ -12,13 +15,10 @@ public interface IRecipeCapabilityHolder {
     }
 
     @NotNull
-    Table<IO, RecipeCapability<?>, List<IRecipeHandler<?>>> getCapabilitiesProxy();
+    Map<IO, List<RecipeHandlerList>> getCapabilitiesProxy();
 
-    /**
-     * get Tier for chance boost.
-     * if -1, all chanced outputs are voided.
-     */
-    default int getChanceTier() {
-        return 0;
+    default <T> List<IRecipeHandler<T>> getCapabilitiesFlat(IO io, RecipeCapability<T> cap) {
+        return getCapabilitiesProxy().getOrDefault(io, Collections.emptyList())
+                    .stream().flatMap(rhl -> rhl.getCapability(cap).stream()).map(i -> (IRecipeHandler<T>)i).toList();
     }
 }

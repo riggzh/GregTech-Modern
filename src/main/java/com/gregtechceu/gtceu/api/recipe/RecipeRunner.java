@@ -4,6 +4,7 @@ import com.gregtechceu.gtceu.api.capability.recipe.IO;
 import com.gregtechceu.gtceu.api.capability.recipe.IRecipeCapabilityHolder;
 import com.gregtechceu.gtceu.api.capability.recipe.IRecipeHandler;
 import com.gregtechceu.gtceu.api.capability.recipe.RecipeCapability;
+import com.gregtechceu.gtceu.api.machine.trait.RecipeHandlerList;
 import com.gregtechceu.gtceu.api.recipe.chance.boost.ChanceBoostFunction;
 import com.gregtechceu.gtceu.api.recipe.chance.logic.ChanceLogic;
 import com.gregtechceu.gtceu.api.recipe.content.Content;
@@ -23,7 +24,7 @@ import java.util.*;
 @SuppressWarnings({ "rawtypes", "unchecked" })
 class RecipeRunner {
 
-    record RecipeHandlingResult(RecipeCapability<?> capability, @UnknownNullability List content,
+    record RecipeHandlingResult(@Nullable RecipeCapability<?> capability, @UnknownNullability List content,
                                 RecipeHandler.ActionResult result) {}
 
     // --------------------------------------------------------------------------------------------------------
@@ -33,15 +34,17 @@ class RecipeRunner {
     private final boolean isTick;
     private final IRecipeCapabilityHolder holder;
     private final Map<RecipeCapability<?>, Object2IntMap<?>> chanceCaches;
-    private final Table<IO, RecipeCapability<?>, List<IRecipeHandler<?>>> capabilityProxies;
+    private final Map<IO, List<RecipeHandlerList>> capabilityProxies;
     private final boolean simulated;
 
     // These are only used to store mutable state during each invocation of handle()
     private RecipeCapability<?> capability;
     private Set<IRecipeHandler<?>> used;
-    @Getter
-    private @UnknownNullability List content;
-    private @UnknownNullability List search;
+    private Map<RecipeCapability<?>, List> recipeContents;
+    private Map<RecipeCapability<?>, List> searchRecipeContents;
+    /*@Getter
+    private Map<IO, > contentMatchList;
+    private @UnknownNullability List searchingMatchList;*/
 
     public RecipeRunner(GTRecipe recipe, IO io, boolean isTick,
                         IRecipeCapabilityHolder holder, Map<RecipeCapability<?>, Object2IntMap<?>> chanceCaches,
@@ -52,123 +55,134 @@ class RecipeRunner {
         this.holder = holder;
         this.chanceCaches = chanceCaches;
         this.capabilityProxies = holder.getCapabilitiesProxy();
+        this.recipeContents = new IdentityHashMap<>();
+        this.searchRecipeContents = new IdentityHashMap<>();
         this.simulated = simulated;
     }
 
     @Nullable
-    public RecipeHandlingResult handle(Map.Entry<RecipeCapability<?>, List<Content>> entry) {
+    public RecipeHandlingResult handle(Map<RecipeCapability<?>, List<Content>> entries) {
         initState();
 
-        this.fillContent(holder, entry);
-        this.capability = this.resolveCapability(entry);
+
+
+        fillContentMatchList(entries);
 
         if (capability == null)
             return null;
 
-        var result = this.handleContents();
-        if (result == null)
-            return null;
-
-        return new RecipeHandlingResult(capability, result, RecipeHandler.ActionResult.SUCCESS);
+        return this.handleContents();
     }
 
     private void initState() {
         used = new HashSet<>();
-        content = new ArrayList<>();
-        search = simulated ? content : new ArrayList<>();
+        //contentMatchList = new ArrayList<>();
+        //searchingMatchList = simulated ? contentMatchList : new ArrayList<>();
     }
 
-    private void fillContent(IRecipeCapabilityHolder holder, Map.Entry<RecipeCapability<?>, List<Content>> entry) {
-        RecipeCapability<?> cap = entry.getKey();
+    /**
+     * Populates the content match list to know if conditions are satisfied.
+     */
+    private void fillContentMatchList(Map<RecipeCapability<?>, List<Content>> entries) {
         ChanceBoostFunction function = recipe.getType().getChanceFunction();
-        ChanceLogic logic = recipe.getChanceLogicForCapability(cap, this.io, this.isTick);
-        List<Content> chancedContents = new ArrayList<>();
-        for (Content cont : entry.getValue()) {
-            // For simulated handling, search/content are the same instance, so there's no need to switch between them
-            this.search.add(cont.content);
-
-            // When simulating the recipe handling (used for recipe matching), chanced contents are ignored.
-            if (simulated) continue;
-
-            if (cont.chance >= cont.maxChance) {
-                this.content.add(cont.content);
-            } else {
-                // unparallel the chanced contents - bandaid fix
-                chancedContents.add(cont.copy(cap, ContentModifier.multiplier(1.0 / recipe.parallels)));
+        for(var entry : entries.entrySet()) {
+            RecipeCapability<?> cap = entry.getKey();
+            if (!cap.doMatchInRecipe()) {
+                continue;
             }
-        }
+            ChanceLogic logic = recipe.getChanceLogicForCapability(cap, this.io, this.isTick);
+            List<Content> chancedContents = new ArrayList<>();
+            if(entry.getValue().isEmpty()) continue;
+            this.recipeContents.putIfAbsent(cap, new ArrayList<>());
+            for (Content cont : entry.getValue()) {
+                this.searchRecipeContents.computeIfAbsent(cap, c -> new ArrayList<>()).add(cont.content);
 
-        // Only roll if there's anything to roll for
-        if (!chancedContents.isEmpty()) {
-            int recipeTier = RecipeHelper.getPreOCRecipeEuTier(recipe);
-            int holderTier = holder.getChanceTier();
-            var cache = this.chanceCaches.get(cap);
-            chancedContents = logic.roll(chancedContents, function, recipeTier, holderTier, cache, recipe.parallels,
+                // When simulating the recipe handling (used for recipe matching), chanced contents are ignored.
+                if (simulated) continue;
+
+                if (cont.chance >= cont.maxChance) {
+                    this.recipeContents.get(cap).add(cont.content);
+                } else {
+                    // unparallel the chanced contents - bandaid fix
+                chancedContents.add(cont.copy(cap, ContentModifier.multiplier(1.0 / recipe.parallels)));
+                }
+            }
+
+            if (!chancedContents.isEmpty()) {
+                int recipeTier = RecipeHelper.getPreOCRecipeEuTier(recipe);
+                int holderTier = holder.getChanceTier();
+                var cache = this.chanceCaches.get(cap);
+                chancedContents = logic.roll(chancedContents, function, recipeTier, holderTier, cache, recipe.parallels,
                     cap);
 
-            if (chancedContents == null) return;
+                if (chancedContents == null) return;
             for (Content cont : chancedContents) {
-                this.content.add(cont.content);
+                this.recipeContents.get(cap).add(cont.content);
+                }
             }
-        }
-    }
 
-    private RecipeCapability<?> resolveCapability(Map.Entry<RecipeCapability<?>, List<Content>> entry) {
-        RecipeCapability<?> capability = entry.getKey();
-        if (!capability.doMatchInRecipe()) {
-            return null;
+            if(!recipeContents.get(cap).isEmpty()) {}
+                //recipeContents.put(cap, recipeContents.get(cap).stream().map(cap::copyContent).toList());
+            else
+                recipeContents.remove(cap);
         }
-
-        content = this.content.stream().map(capability::copyContent).toList();
-        if (this.content.isEmpty()) {
-            content = null;
-            return null;
-        }
-
-        return capability;
     }
 
     @Nullable
-    private List handleContents() {
-        handleContentsInternal(io);
-        if (content == null) return null;
-        handleContentsInternal(IO.BOTH);
-
-        return content;
+    private RecipeHandlingResult handleContents() {
+        var result = handleContentsInternal(io);
+        if (!result.result.isSuccess()) {
+            return result;
+        }
+        if(recipeContents.isEmpty()) {
+            return new RecipeHandlingResult(null, null, RecipeHandler.ActionResult.SUCCESS);
+        }
+        return handleContentsInternal(IO.BOTH);
     }
 
-    private void handleContentsInternal(IO capIO) {
-        if (!capabilityProxies.contains(capIO, capability))
-            return;
+    private RecipeHandlingResult handleContentsInternal(IO capIO) {
 
         // noinspection DataFlowIssue checked above.
-        var handlers = new ArrayList<>(capabilityProxies.get(capIO, capability));
-        handlers.sort(IRecipeHandler.ENTRY_COMPARATOR);
+        var handlers = new ArrayList<>(capabilityProxies.get(capIO));
+
+        //handlers.sort(IRecipeHandler.ENTRY_COMPARATOR);
 
         // handle distinct first
-        for (IRecipeHandler<?> handler : handlers) {
+        boolean handled = false;
+        for (var handler : handlers) {
             if (!handler.isDistinct()) continue;
-            var result = handler.handleRecipe(io, recipe, search, null, true);
-            if (result == null) {
-                if (!simulated) {
-                    handler.handleRecipe(io, recipe, content, null, false);
+            var res = handler.handleRecipe(io, recipe, searchRecipeContents, true);
+            if (res.isEmpty()) {
+                if(!simulated) {
+                    handler.handleRecipe(io, recipe, recipeContents, false);
                 }
-                content = null;
-            }
-            if (content == null) {
+                handled = true;
                 break;
             }
         }
-        if (content != null) {
-            // handle undistinct later
-            for (IRecipeHandler<?> proxy : handlers) {
-                if (used.contains(proxy) || proxy.isDistinct()) continue;
-                used.add(proxy);
-                if (content != null) {
-                    content = proxy.handleRecipe(io, recipe, content, null, simulated);
+
+        if(!handled) {
+            for(var handler : handlers) {
+                if(!recipeContents.isEmpty()) {
+                    recipeContents = handler.handleRecipe(io, recipe, recipeContents, simulated);
                 }
-                if (content == null) break;
+                if(recipeContents.isEmpty()) {
+                    handled = true;
+                    break;
+                }
             }
         }
+
+        if(handled) {
+            return new RecipeHandlingResult(null, null, RecipeHandler.ActionResult.SUCCESS);
+        }
+
+        for(var entry : recipeContents.entrySet()) {
+            if(entry.getValue() != null && !entry.getValue().isEmpty()) {
+                return new RecipeHandlingResult(entry.getKey(), entry.getValue(), RecipeHandler.ActionResult.FAIL_NO_REASON);
+            }
+        }
+
+        return new RecipeHandlingResult(null, null, RecipeHandler.ActionResult.FAIL_NO_REASON);
     }
 }

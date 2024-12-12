@@ -37,7 +37,7 @@ public class ItemRecipeHandler implements IRecipeHandler<Ingredient> {
     }
 
     @Override
-    public List<Ingredient> handleRecipeInner(IO io, GTRecipe recipe, List<Ingredient> left, @Nullable String slotName,
+    public List<Ingredient> handleRecipeInner(IO io, GTRecipe recipe, List<Ingredient> left,
                                               boolean simulate) {
         return handleIngredient(io, recipe, left, simulate, this.handlerIO, storage);
     }

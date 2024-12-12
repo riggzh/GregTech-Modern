@@ -62,7 +62,7 @@ public class NotifiableStressTrait extends NotifiableRecipeHandlerTrait<Float> i
     }
 
     @Override
-    public List<Float> handleRecipeInner(IO io, GTRecipe recipe, List<Float> left, @Nullable String slotName,
+    public List<Float> handleRecipeInner(IO io, GTRecipe recipe, List<Float> left,
                                          boolean simulate) {
         if (machine instanceof IKineticMachine kineticMachine) {
             float sum = left.stream().reduce(0f, Float::sum);

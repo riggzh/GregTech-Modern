@@ -1,15 +1,19 @@
 package com.gregtechceu.gtceu.api.machine.multiblock.part;
 
+import com.gregtechceu.gtceu.api.capability.recipe.IO;
+import com.gregtechceu.gtceu.api.capability.recipe.IRecipeHandler;
 import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity;
 import com.gregtechceu.gtceu.api.machine.MetaMachine;
 import com.gregtechceu.gtceu.api.machine.feature.multiblock.IMultiController;
 import com.gregtechceu.gtceu.api.machine.feature.multiblock.IMultiPart;
 import com.gregtechceu.gtceu.api.machine.trait.IRecipeHandlerTrait;
 
+import com.gregtechceu.gtceu.api.machine.trait.RecipeHandlerList;
 import com.lowdragmc.lowdraglib.syncdata.annotation.DescSynced;
 import com.lowdragmc.lowdraglib.syncdata.annotation.RequireRerender;
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder;
 
+import lombok.Getter;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -37,15 +41,9 @@ public class MultiblockPartMachine extends MetaMachine implements IMultiPart {
     @RequireRerender
     protected final Set<BlockPos> controllerPositions;
 
-    private final List<IRecipeHandlerTrait> recipeHandlerTraits;
-
     public MultiblockPartMachine(IMachineBlockEntity holder) {
         super(holder);
         this.controllerPositions = new HashSet<>();
-
-        recipeHandlerTraits = traits.stream().filter(IRecipeHandlerTrait.class::isInstance)
-                .map(IRecipeHandlerTrait.class::cast)
-                .toList();
     }
 
     //////////////////////////////////////
@@ -78,9 +76,15 @@ public class MultiblockPartMachine extends MetaMachine implements IMultiPart {
         return result;
     }
 
-    @Override
-    public List<IRecipeHandlerTrait> getRecipeHandlers() {
-        return recipeHandlerTraits;
+    public RecipeHandlerList getRecipeHandlers() {
+        var a = traits.stream().filter(IRecipeHandlerTrait.class::isInstance).map(IRecipeHandlerTrait.class::cast)
+                .toList();
+        if(a.isEmpty()) {
+            return new RecipeHandlerList(IO.NONE);
+        }
+        var l = new RecipeHandlerList(a.get(0).getHandlerIO());
+        l.addHandler(a.toArray(new IRecipeHandler[0]));
+        return l;
     }
 
     @Override

@@ -12,6 +12,7 @@ import com.gregtechceu.gtceu.api.machine.feature.IMufflableMachine;
 import com.gregtechceu.gtceu.api.machine.feature.IRecipeLogicMachine;
 import com.gregtechceu.gtceu.api.machine.trait.IRecipeHandlerTrait;
 import com.gregtechceu.gtceu.api.machine.trait.MachineTrait;
+import com.gregtechceu.gtceu.api.machine.trait.RecipeHandlerList;
 import com.gregtechceu.gtceu.api.machine.trait.RecipeLogic;
 import com.gregtechceu.gtceu.api.recipe.GTRecipeType;
 
@@ -22,6 +23,7 @@ import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
 import com.lowdragmc.lowdraglib.syncdata.annotation.RequireRerender;
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -79,7 +81,7 @@ public abstract class SteamWorkableMachine extends SteamMachine
     protected boolean isMuffled;
     protected boolean previouslyMuffled = true;
     @Getter
-    protected final Table<IO, RecipeCapability<?>, List<IRecipeHandler<?>>> capabilitiesProxy;
+    protected final Map<IO, List<RecipeHandlerList>> capabilitiesProxy;
     protected final List<ISubscription> traitSubscriptions;
 
     public SteamWorkableMachine(IMachineBlockEntity holder, boolean isHighPressure, Object... args) {
@@ -87,7 +89,7 @@ public abstract class SteamWorkableMachine extends SteamMachine
         this.recipeTypes = getDefinition().getRecipeTypes();
         this.activeRecipeType = 0;
         this.recipeLogic = createRecipeLogic(args);
-        this.capabilitiesProxy = Tables.newCustomTable(new EnumMap<>(IO.class), IdentityHashMap::new);
+        this.capabilitiesProxy = new Object2ObjectOpenHashMap<>();
         this.traitSubscriptions = new ArrayList<>();
         this.outputFacing = hasFrontFacing() ? getFrontFacing().getOpposite() : Direction.UP;
     }
@@ -103,15 +105,20 @@ public abstract class SteamWorkableMachine extends SteamMachine
     @Override
     public void onLoad() {
         super.onLoad();
+        // attach self traits
+        Map<IO, List<IRecipeHandlerTrait<?>>> ioTraits = new Object2ObjectOpenHashMap<>();
+
         for (MachineTrait trait : getTraits()) {
             if (trait instanceof IRecipeHandlerTrait<?> handlerTrait) {
-                if (!capabilitiesProxy.contains(handlerTrait.getHandlerIO(), handlerTrait.getCapability())) {
-                    capabilitiesProxy.put(handlerTrait.getHandlerIO(), handlerTrait.getCapability(), new ArrayList<>());
-                }
-                var handlers = capabilitiesProxy.get(handlerTrait.getHandlerIO(), handlerTrait.getCapability());
-                if (handlers != null) handlers.add(handlerTrait);
-                traitSubscriptions.add(handlerTrait.addChangedListener(recipeLogic::updateTickSubscription));
+                ioTraits.computeIfAbsent(handlerTrait.getHandlerIO(), i -> new ArrayList<>()).add(handlerTrait);
             }
+        }
+
+        for(var entry : ioTraits.entrySet()) {
+            RecipeHandlerList handlerList = new RecipeHandlerList(entry.getKey());
+            handlerList.addHandler(entry.getValue().toArray(new IRecipeHandler[0]));
+            capabilitiesProxy.computeIfAbsent(entry.getKey(), i -> new ArrayList<>()).add(handlerList);
+            traitSubscriptions.addAll(handlerList.addChangeListeners(recipeLogic::updateTickSubscription));
         }
     }
 

@@ -33,7 +33,7 @@ public class SteamEnergyRecipeHandler implements IRecipeHandler<Long> {
     }
 
     @Override
-    public List<Long> handleRecipeInner(IO io, GTRecipe recipe, List<Long> left, @Nullable String slotName,
+    public List<Long> handleRecipeInner(IO io, GTRecipe recipe, List<Long> left,
                                         boolean simulate) {
         long sum = left.stream().reduce(0L, Long::sum);
         long realSum = (long) Math.ceil(sum * conversionRate);
@@ -42,7 +42,7 @@ public class SteamEnergyRecipeHandler implements IRecipeHandler<Long> {
                     FluidIngredient.of(GTMaterials.Steam.getFluid(realSum));
             var list = new ArrayList<FluidIngredient>();
             list.add(steam);
-            var leftSteam = steamTank.handleRecipeInner(io, recipe, list, slotName, simulate);
+            var leftSteam = steamTank.handleRecipeInner(io, recipe, list, simulate);
             if (leftSteam == null || leftSteam.isEmpty()) return null;
             sum = (long) (leftSteam.get(0).getAmount() / conversionRate);
         }

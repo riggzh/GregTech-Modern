@@ -5,6 +5,7 @@ import com.gregtechceu.gtceu.api.machine.feature.IFancyUIMachine;
 import com.gregtechceu.gtceu.api.machine.feature.IMachineFeature;
 import com.gregtechceu.gtceu.api.machine.multiblock.WorkableMultiblockMachine;
 import com.gregtechceu.gtceu.api.machine.trait.IRecipeHandlerTrait;
+import com.gregtechceu.gtceu.api.machine.trait.RecipeHandlerList;
 import com.gregtechceu.gtceu.api.machine.trait.RecipeLogic;
 import com.gregtechceu.gtceu.api.recipe.GTRecipe;
 
@@ -59,7 +60,7 @@ public interface IMultiPart extends IMachineFeature, IFancyUIMachine {
     /**
      * Get all available traits for recipe logic.
      */
-    List<IRecipeHandlerTrait> getRecipeHandlers();
+    RecipeHandlerList getRecipeHandlers();
 
     /**
      * whether its base model can be replaced by controller when it is formed.

@@ -44,10 +44,10 @@ public class FluidHandlerProxyRecipeTrait extends NotifiableRecipeHandlerTrait<F
 
     @Override
     public List<FluidIngredient> handleRecipeInner(IO io, GTRecipe recipe, List<FluidIngredient> left,
-                                                   @Nullable String slotName, boolean simulate) {
+                                                   boolean simulate) {
         if (!enabled) return left;
         for (IRecipeHandler<FluidIngredient> handler : handlers) {
-            handler.handleRecipeInner(io, recipe, left, slotName, simulate);
+            handler.handleRecipeInner(io, recipe, left, simulate);
             if (left.isEmpty()) return null;
         }
         return left;

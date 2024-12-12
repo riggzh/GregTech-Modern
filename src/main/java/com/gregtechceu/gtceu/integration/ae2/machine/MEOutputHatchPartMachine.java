@@ -140,7 +140,25 @@ public class MEOutputHatchPartMachine extends MEHatchPartMachine implements IMac
         public boolean isFluidValid(int tank, @NotNull FluidStack stack) {
             return storage.isFluidValid(stack);
         }
-    }
+
+        @Override
+        @Nullable
+        public List<FluidIngredient> handleRecipeInner(IO io, GTRecipe recipe, List<FluidIngredient> left,
+                                                       boolean simulate) {
+            if (io != IO.OUT) return left;
+            FluidAction action = simulate ? FluidAction.SIMULATE : FluidAction.EXECUTE;
+            for (var it = left.iterator(); it.hasNext();) {
+                var ingredient = it.next();
+                if (ingredient.isEmpty()) {
+                    it.remove();
+                    continue;
+                }
+
+                var fluids = ingredient.getStacks();
+                if (fluids.length == 0 || fluids[0].isEmpty()) {
+                    it.remove();
+                    continue;
+                }
 
     private class FluidStorageDelegate extends FluidStorage {
 

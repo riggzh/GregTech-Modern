@@ -137,11 +137,11 @@ public class MEPatternBufferRecipeHandler extends MachineTrait {
 
         @Override
         public List<Ingredient> handleRecipeInner(IO io, GTRecipe recipe, List<Ingredient> left,
-                                                  @Nullable String slotName, boolean simulate) {
+                                                  boolean simulate) {
             if (io != IO.IN) return left;
             var machine = getMachine();
-            machine.getCircuitInventorySimulated().handleRecipeInner(io, recipe, left, slotName, simulate);
-            machine.getShareInventory().handleRecipeInner(io, recipe, left, slotName, simulate);
+            machine.getCircuitInventorySimulated().handleRecipeInner(io, recipe, left, simulate);
+            machine.getShareInventory().handleRecipeInner(io, recipe, left, simulate);
             return handleItemInner(recipe, left, simulate);
         }
 
@@ -206,14 +206,10 @@ public class MEPatternBufferRecipeHandler extends MachineTrait {
         }
 
         @Override
-        public List<FluidIngredient> handleRecipeInner(
-                                                       IO io,
-                                                       GTRecipe recipe,
-                                                       List<FluidIngredient> left,
-                                                       @Nullable String slotName,
-                                                       boolean simulate) {
+        public List<FluidIngredient> handleRecipeInner(IO io, GTRecipe recipe,
+                                                       List<FluidIngredient> left, boolean simulate) {
             if (io != IO.IN) return left;
-            getMachine().getShareTank().handleRecipeInner(io, recipe, left, slotName, simulate);
+            getMachine().getShareTank().handleRecipeInner(io, recipe, left, simulate);
             return handleFluidInner(recipe, left, simulate);
         }
 

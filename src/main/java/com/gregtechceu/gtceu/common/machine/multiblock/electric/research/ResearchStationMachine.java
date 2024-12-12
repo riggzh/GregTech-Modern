@@ -11,6 +11,7 @@ import com.gregtechceu.gtceu.api.capability.recipe.ItemRecipeCapability;
 import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity;
 import com.gregtechceu.gtceu.api.machine.feature.multiblock.IMultiPart;
 import com.gregtechceu.gtceu.api.machine.multiblock.WorkableElectricMultiblockMachine;
+import com.gregtechceu.gtceu.api.machine.trait.RecipeHandlerList;
 import com.gregtechceu.gtceu.api.machine.trait.RecipeLogic;
 import com.gregtechceu.gtceu.api.recipe.GTRecipe;
 import com.gregtechceu.gtceu.api.recipe.GTRecipeType;
@@ -61,9 +62,7 @@ public class ResearchStationMachine extends WorkableElectricMultiblockMachine im
                 this.computationProvider = provider;
             }
             if (part instanceof IObjectHolder objectHolder) {
-                this.objectHolder = objectHolder;
-                this.getCapabilitiesProxy().put(IO.IN, ItemRecipeCapability.CAP,
-                        Collections.singletonList(objectHolder.getAsHandler()));
+                this.getCapabilitiesProxy().put(IO.IN, List.of(RecipeHandlerList.of(IO.IN, objectHolder.getAsHandler())));
             }
         }
 

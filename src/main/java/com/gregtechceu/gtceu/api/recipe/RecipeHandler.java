@@ -73,7 +73,7 @@ public class RecipeHandler {
                                             boolean isTick, boolean simulated) {
         RecipeRunner runner = new RecipeRunner(recipe, io, isTick, holder, chanceCaches, simulated);
         for (Map.Entry<RecipeCapability<?>, List<Content>> entry : contents.entrySet()) {
-            var handle = runner.handle(entry);
+            var handle = runner.handle(contents);
             if (handle == null)
                 continue;
 
@@ -121,12 +121,13 @@ public class RecipeHandler {
 
     public static void handlePre(IRecipeCapabilityHolder holder, GTRecipe recipe, IO io) {
         (io == io.IN ? recipe.inputs : recipe.outputs).forEach(((capability, tuples) -> {
-            if (holder.getCapabilitiesProxy().contains(io, capability)) {
-                for (IRecipeHandler<?> capabilityProxy : holder.getCapabilitiesProxy().get(io, capability)) {
+            var capFlatMap = holder.getCapabilitiesFlat(io, capability);
+            if (!capFlatMap.isEmpty()) {
+                for (IRecipeHandler<?> capabilityProxy : capFlatMap) {
                     capabilityProxy.preWorking(holder, io, recipe);
                 }
-            } else if (holder.getCapabilitiesProxy().contains(IO.BOTH, capability)) {
-                for (IRecipeHandler<?> capabilityProxy : holder.getCapabilitiesProxy().get(IO.BOTH, capability)) {
+            } else if (!holder.getCapabilitiesFlat(IO.BOTH, capability).isEmpty()) {
+                for (IRecipeHandler<?> capabilityProxy : holder.getCapabilitiesFlat(IO.BOTH, capability)) {
                     capabilityProxy.preWorking(holder, io, recipe);
                 }
             }
@@ -135,12 +136,13 @@ public class RecipeHandler {
 
     public static void handlePost(IRecipeCapabilityHolder holder, GTRecipe recipe, IO io) {
         (io == io.IN ? recipe.inputs : recipe.outputs).forEach(((capability, tuples) -> {
-            if (holder.getCapabilitiesProxy().contains(io, capability)) {
-                for (IRecipeHandler<?> capabilityProxy : holder.getCapabilitiesProxy().get(io, capability)) {
+            var capFlatMap = holder.getCapabilitiesFlat(io, capability);
+            if (!capFlatMap.isEmpty()) {
+                for (IRecipeHandler<?> capabilityProxy : capFlatMap) {
                     capabilityProxy.postWorking(holder, io, recipe);
                 }
-            } else if (holder.getCapabilitiesProxy().contains(IO.BOTH, capability)) {
-                for (IRecipeHandler<?> capabilityProxy : holder.getCapabilitiesProxy().get(IO.BOTH, capability)) {
+            } else if (!holder.getCapabilitiesFlat(IO.BOTH, capability).isEmpty()) {
+                for (IRecipeHandler<?> capabilityProxy : holder.getCapabilitiesFlat(IO.BOTH, capability)) {
                     capabilityProxy.postWorking(holder, io, recipe);
                 }
             }

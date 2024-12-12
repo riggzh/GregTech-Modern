@@ -424,6 +424,7 @@ public class GTRecipeLookup {
      */
     @NotNull
     protected List<List<AbstractMapIngredient>> fromHolder(@NotNull IRecipeCapabilityHolder r) {
+
         List<List<AbstractMapIngredient>> list = new ObjectArrayList<>(
                 r.getCapabilitiesProxy().row(IO.IN).values().size());
         r.getCapabilitiesProxy().row(IO.IN).forEach((cap, handlers) -> {

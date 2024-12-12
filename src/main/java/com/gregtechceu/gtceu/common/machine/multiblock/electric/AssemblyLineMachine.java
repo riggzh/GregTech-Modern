@@ -33,10 +33,7 @@ public class AssemblyLineMachine extends WorkableElectricMultiblockMachine {
         if (ConfigHolder.INSTANCE.machines.orderedAssemblyLineItems) {
 
             var recipeInputs = recipe.inputs.get(ItemRecipeCapability.CAP);
-            var itemInputInventory = Objects
-                    .requireNonNullElseGet(getCapabilitiesProxy().get(IO.IN, ItemRecipeCapability.CAP),
-                            Collections::<IRecipeHandler<?>>emptyList)
-                    .stream()
+            var itemInputInventory = getCapabilitiesFlat(IO.IN, ItemRecipeCapability.CAP).stream()
                     .filter(handler -> !handler.isProxy())
                     .map(container -> container.getContents().stream().filter(ItemStack.class::isInstance)
                             .map(ItemStack.class::cast).toList())
@@ -55,10 +52,7 @@ public class AssemblyLineMachine extends WorkableElectricMultiblockMachine {
 
             if (ConfigHolder.INSTANCE.machines.orderedAssemblyLineFluids) {
                 recipeInputs = recipe.inputs.get(FluidRecipeCapability.CAP);
-                var itemFluidInventory = Objects
-                        .requireNonNullElseGet(getCapabilitiesProxy().get(IO.IN, FluidRecipeCapability.CAP),
-                                Collections::<IRecipeHandler<?>>emptyList)
-                        .stream()
+                var itemFluidInventory = getCapabilitiesFlat(IO.IN, FluidRecipeCapability.CAP).stream()
                         .map(container -> container.getContents().stream().filter(FluidStack.class::isInstance)
                                 .map(FluidStack.class::cast).toList())
                         .filter(container -> !container.isEmpty())

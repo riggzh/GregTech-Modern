@@ -16,6 +16,7 @@ import com.google.common.collect.Table;
 import com.google.common.collect.Tables;
 import com.mojang.blaze3d.MethodsReturnNonnullByDefault;
 import it.unimi.dsi.fastutil.ints.Int2LongFunction;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
@@ -67,7 +68,7 @@ public abstract class WorkableTieredMachine extends TieredEnergyMachine implemen
     @Persisted
     public final NotifiableComputationContainer exportComputation;
     @Getter
-    protected final Table<IO, RecipeCapability<?>, List<IRecipeHandler<?>>> capabilitiesProxy;
+    protected final Map<IO, List<RecipeHandlerList>> capabilitiesProxy;
     @Persisted
     @Getter
     protected int overclockTier;
@@ -86,7 +87,7 @@ public abstract class WorkableTieredMachine extends TieredEnergyMachine implemen
         this.recipeTypes = getDefinition().getRecipeTypes();
         this.activeRecipeType = 0;
         this.tankScalingFunction = tankScalingFunction;
-        this.capabilitiesProxy = Tables.newCustomTable(new EnumMap<>(IO.class), IdentityHashMap::new);
+        this.capabilitiesProxy = new Object2ObjectOpenHashMap<>();
         this.traitSubscriptions = new ArrayList<>();
         this.recipeLogic = createRecipeLogic(args);
         this.importItems = createImportItemHandler(args);
@@ -162,14 +163,20 @@ public abstract class WorkableTieredMachine extends TieredEnergyMachine implemen
     @Override
     public void onLoad() {
         super.onLoad();
+        // attach self traits
+        Map<IO, List<IRecipeHandlerTrait<?>>> ioTraits = new Object2ObjectOpenHashMap<>();
+
         for (MachineTrait trait : getTraits()) {
             if (trait instanceof IRecipeHandlerTrait<?> handlerTrait) {
-                if (!capabilitiesProxy.contains(handlerTrait.getHandlerIO(), handlerTrait.getCapability())) {
-                    capabilitiesProxy.put(handlerTrait.getHandlerIO(), handlerTrait.getCapability(), new ArrayList<>());
-                }
-                capabilitiesProxy.get(handlerTrait.getHandlerIO(), handlerTrait.getCapability()).add(handlerTrait);
-                traitSubscriptions.add(handlerTrait.addChangedListener(recipeLogic::updateTickSubscription));
+                ioTraits.computeIfAbsent(handlerTrait.getHandlerIO(), i -> new ArrayList<>()).add(handlerTrait);
             }
+        }
+
+        for(var entry : ioTraits.entrySet()) {
+            RecipeHandlerList handlerList = new RecipeHandlerList(entry.getKey());
+            handlerList.addHandler(entry.getValue().toArray(new IRecipeHandler[0]));
+            capabilitiesProxy.computeIfAbsent(entry.getKey(), i -> new ArrayList<>()).add(handlerList);
+            traitSubscriptions.addAll(handlerList.addChangeListeners(recipeLogic::updateTickSubscription));
         }
     }
 

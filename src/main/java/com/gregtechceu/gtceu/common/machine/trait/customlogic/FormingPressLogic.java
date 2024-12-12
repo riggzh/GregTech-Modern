@@ -24,10 +24,7 @@ public class FormingPressLogic implements GTRecipeType.ICustomRecipeLogic {
 
     @Override
     public @Nullable GTRecipe createCustomRecipe(IRecipeCapabilityHolder holder) {
-        var handlers = Objects
-                .requireNonNullElseGet(holder.getCapabilitiesProxy().get(IO.IN, ItemRecipeCapability.CAP),
-                        Collections::emptyList)
-                .stream()
+        var handlers = holder.getCapabilitiesFlat(IO.IN, ItemRecipeCapability.CAP).stream()
                 .filter(NotifiableItemStackHandler.class::isInstance)
                 .map(NotifiableItemStackHandler.class::cast)
                 .filter(i -> i.getSlots() > 1)

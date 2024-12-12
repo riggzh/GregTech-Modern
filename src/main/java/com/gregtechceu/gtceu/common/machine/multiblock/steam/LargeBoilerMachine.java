@@ -121,15 +121,10 @@ public class LargeBoilerMachine extends WorkableMultiblockMachine implements IEx
                     (ConfigHolder.INSTANCE.machines.largeBoilers.steamPerWater * 100000L);
             var drainWater = List.of(FluidIngredient.of(maxDrain, Fluids.WATER));
             List<IRecipeHandler<?>> inputTanks = new ArrayList<>();
-            if (getCapabilitiesProxy().contains(IO.IN, FluidRecipeCapability.CAP)) {
-                inputTanks.addAll(Objects.requireNonNull(getCapabilitiesProxy().get(IO.IN, FluidRecipeCapability.CAP)));
-            }
-            if (getCapabilitiesProxy().contains(IO.BOTH, FluidRecipeCapability.CAP)) {
-                inputTanks
-                        .addAll(Objects.requireNonNull(getCapabilitiesProxy().get(IO.BOTH, FluidRecipeCapability.CAP)));
-            }
+            inputTanks.addAll(getCapabilitiesFlat(IO.IN, FluidRecipeCapability.CAP));
+            inputTanks.addAll(getCapabilitiesFlat(IO.BOTH, FluidRecipeCapability.CAP));
             for (IRecipeHandler<?> tank : inputTanks) {
-                drainWater = (List<FluidIngredient>) tank.handleRecipe(IO.IN, null, drainWater, null, false);
+                drainWater = (List<FluidIngredient>) tank.handleRecipe(IO.IN, null, drainWater, false);
                 if (drainWater == null) break;
             }
             var drained = (drainWater == null || drainWater.isEmpty()) ? maxDrain :
@@ -142,16 +137,10 @@ public class LargeBoilerMachine extends WorkableMultiblockMachine implements IEx
                 // fill steam
                 var fillSteam = List.of(FluidIngredient.of(GTMaterials.Steam.getFluid(steamGenerated)));
                 List<IRecipeHandler<?>> outputTanks = new ArrayList<>();
-                if (getCapabilitiesProxy().contains(IO.OUT, FluidRecipeCapability.CAP)) {
-                    outputTanks.addAll(
-                            Objects.requireNonNull(getCapabilitiesProxy().get(IO.OUT, FluidRecipeCapability.CAP)));
-                }
-                if (getCapabilitiesProxy().contains(IO.BOTH, FluidRecipeCapability.CAP)) {
-                    outputTanks.addAll(
-                            Objects.requireNonNull(getCapabilitiesProxy().get(IO.BOTH, FluidRecipeCapability.CAP)));
-                }
+                outputTanks.addAll(getCapabilitiesFlat(IO.OUT, FluidRecipeCapability.CAP));
+                outputTanks.addAll(getCapabilitiesFlat(IO.BOTH, FluidRecipeCapability.CAP));
                 for (IRecipeHandler<?> tank : outputTanks) {
-                    fillSteam = (List<FluidIngredient>) tank.handleRecipe(IO.OUT, null, fillSteam, null, false);
+                    fillSteam = (List<FluidIngredient>) tank.handleRecipe(IO.OUT, null, fillSteam, false);
                     if (fillSteam == null) break;
                 }
             }

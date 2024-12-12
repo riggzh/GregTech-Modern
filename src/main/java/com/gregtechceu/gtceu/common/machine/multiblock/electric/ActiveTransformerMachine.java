@@ -89,6 +89,15 @@ public class ActiveTransformerMachine extends WorkableElectricMultiblockMachine
         for (IMultiPart part : getPrioritySortedParts()) {
             IO io = ioMap.getOrDefault(part.self().getPos().asLong(), IO.BOTH);
             if (io == IO.NONE) continue;
+            var handlerList = part.getRecipeHandlers();
+            if (io != IO.BOTH && handlerList.getHandlerIO() != IO.BOTH && io != handlerList.getHandlerIO()) continue;
+
+            handlerList.getCapability(EURecipeCapability.CAP).stream()
+                    .filter(v -> v instanceof IEnergyContainer)
+                    .forEach(v -> {
+                        if()
+                    });
+
             for (var handler : part.getRecipeHandlers()) {
                 var handlerIO = handler.getHandlerIO();
                 // If IO not compatible

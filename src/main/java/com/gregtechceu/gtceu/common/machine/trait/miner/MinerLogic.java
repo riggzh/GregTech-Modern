@@ -6,6 +6,7 @@ import com.gregtechceu.gtceu.api.capability.recipe.*;
 import com.gregtechceu.gtceu.api.item.tool.GTToolType;
 import com.gregtechceu.gtceu.api.machine.MetaMachine;
 import com.gregtechceu.gtceu.api.machine.feature.IRecipeLogicMachine;
+import com.gregtechceu.gtceu.api.machine.trait.RecipeHandlerList;
 import com.gregtechceu.gtceu.api.machine.trait.RecipeLogic;
 import com.gregtechceu.gtceu.api.misc.IgnoreEnergyRecipeHandler;
 import com.gregtechceu.gtceu.api.misc.ItemRecipeHandler;
@@ -24,6 +25,7 @@ import com.lowdragmc.lowdraglib.side.item.IItemTransfer;
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -116,7 +118,7 @@ public class MinerLogic extends RecipeLogic implements IRecipeCapabilityHolder {
     @Getter
     private boolean isInventoryFull;
     @Getter
-    private final Table<IO, RecipeCapability<?>, List<IRecipeHandler<?>>> capabilitiesProxy;
+    private final Map<IO, List<RecipeHandlerList>> capabilitiesProxy;
     private final ItemRecipeHandler inputItemHandler, outputItemHandler;
     private final IgnoreEnergyRecipeHandler inputEnergyHandler;
 
@@ -138,15 +140,21 @@ public class MinerLogic extends RecipeLogic implements IRecipeCapabilityHolder {
         this.isDone = false;
         this.pickaxeTool = GTItems.TOOL_ITEMS.get(GTMaterials.Neutronium, GTToolType.PICKAXE).get().get();
         this.pickaxeTool.enchant(Enchantments.BLOCK_FORTUNE, fortune);
-        this.capabilitiesProxy = Tables.newCustomTable(new EnumMap<>(IO.class), IdentityHashMap::new);
+        this.capabilitiesProxy = new Object2ObjectOpenHashMap<>();
         this.inputItemHandler = new ItemRecipeHandler(IO.IN,
                 machine.getRecipeType().getMaxInputs(ItemRecipeCapability.CAP));
         this.outputItemHandler = new ItemRecipeHandler(IO.OUT,
                 machine.getRecipeType().getMaxOutputs(ItemRecipeCapability.CAP));
         this.inputEnergyHandler = new IgnoreEnergyRecipeHandler();
-        this.capabilitiesProxy.put(IO.IN, inputItemHandler.getCapability(), List.of(inputItemHandler));
-        this.capabilitiesProxy.put(IO.IN, inputEnergyHandler.getCapability(), List.of(inputEnergyHandler));
-        this.capabilitiesProxy.put(IO.OUT, outputItemHandler.getCapability(), List.of(outputItemHandler));
+
+        RecipeHandlerList inHandlers = new RecipeHandlerList(IO.IN);
+        RecipeHandlerList outHandlers = new RecipeHandlerList(IO.OUT);
+
+        inHandlers.addHandler(inputItemHandler, inputEnergyHandler);
+        outHandlers.addHandler(outputItemHandler);
+
+        this.capabilitiesProxy.put(IO.IN, List.of(inHandlers));
+        this.capabilitiesProxy.put(IO.OUT, List.of(outHandlers));
     }
 
     @Override
@@ -385,8 +393,8 @@ public class MinerLogic extends RecipeLogic implements IRecipeCapabilityHolder {
 
     protected ItemTransferList getCachedItemTransfer() {
         if (cachedItemTransfer == null) {
-            cachedItemTransfer = new ItemTransferList(machine.getCapabilitiesProxy()
-                    .get(IO.OUT, ItemRecipeCapability.CAP).stream().map(IItemTransfer.class::cast).toList());
+            cachedItemTransfer = new ItemTransferList(machine
+                    .getCapabilitiesFlat(IO.OUT, ItemRecipeCapability.CAP).stream().map(IItemTransfer.class::cast).toList());
         }
         return cachedItemTransfer;
     }

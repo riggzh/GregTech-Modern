@@ -42,11 +42,11 @@ public class ItemHandlerProxyRecipeTrait extends NotifiableRecipeHandlerTrait<In
     }
 
     @Override
-    public List<Ingredient> handleRecipeInner(IO io, GTRecipe recipe, List<Ingredient> left, @Nullable String slotName,
+    public List<Ingredient> handleRecipeInner(IO io, GTRecipe recipe, List<Ingredient> left,
                                               boolean simulate) {
         if (!enabled) return left;
         for (IRecipeHandler<Ingredient> handler : handlers) {
-            handler.handleRecipeInner(io, recipe, left, slotName, simulate);
+            handler.handleRecipeInner(io, recipe, left, simulate);
             if (left.isEmpty()) return null;
         }
         return left;

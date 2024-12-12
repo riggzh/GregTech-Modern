@@ -166,7 +166,7 @@ public final class ResearchManager {
 
         @Override
         public GTRecipe createCustomRecipe(IRecipeCapabilityHolder holder) {
-            var itemInputs = holder.getCapabilitiesProxy().get(IO.IN, ItemRecipeCapability.CAP).stream()
+            var itemInputs = holder.getCapabilitiesFlat(IO.IN, ItemRecipeCapability.CAP).stream()
                     .filter(IItemTransfer.class::isInstance).map(IItemTransfer.class::cast)
                     .toArray(IItemTransfer[]::new);
             var inputs = new ItemTransferList(itemInputs);

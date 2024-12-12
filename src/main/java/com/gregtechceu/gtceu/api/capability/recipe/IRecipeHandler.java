@@ -34,13 +34,12 @@ public interface IRecipeHandler<K> extends IFilteredHandler<K> {
      * @param io       the IO type of this recipe. always be one of the {@link IO#IN} or {@link IO#OUT}
      * @param recipe   recipe.
      * @param left     left contents for to be handled.
-     * @param slotName specific slot name.
      * @param simulate simulate.
      * @return left contents for continue handling by other proxies.
      *         <br>
      *         null - nothing left. handling successful/finish. you should always return null as a handling-done mark.
      */
-    List<K> handleRecipeInner(IO io, GTRecipe recipe, List<K> left, @Nullable String slotName, boolean simulate);
+    List<K> handleRecipeInner(IO io, GTRecipe recipe, List<K> left, boolean simulate);
 
     /**
      * container size, if it has one. otherwise -1.
@@ -71,12 +70,12 @@ public interface IRecipeHandler<K> extends IFilteredHandler<K> {
         return getCapability().copyInner((K) content);
     }
 
-    default List<K> handleRecipe(IO io, GTRecipe recipe, List<?> left, @Nullable String slotName, boolean simulate) {
+    default List<K> handleRecipe(IO io, GTRecipe recipe, List<?> left, boolean simulate) {
         List<K> contents = new ObjectArrayList<>(left.size());
         for (Object leftObj : left) {
             contents.add(copyContent(leftObj));
         }
-        return handleRecipeInner(io, recipe, contents, slotName, simulate);
+        return handleRecipeInner(io, recipe, contents, simulate);
     }
 
     default void preWorking(IRecipeCapabilityHolder holder, IO io, GTRecipe recipe) {}

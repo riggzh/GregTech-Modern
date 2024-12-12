@@ -31,10 +31,10 @@ public class MEPatternBufferProxyRecipeHandler<T> extends NotifiableRecipeHandle
     }
 
     @Override
-    public List<T> handleRecipeInner(IO io, GTRecipe recipe, List<T> left, @Nullable String slotName,
+    public List<T> handleRecipeInner(IO io, GTRecipe recipe, List<T> left,
                                      boolean simulate) {
         for (IRecipeHandler<T> handler : handlers) {
-            handler.handleRecipeInner(io, recipe, left, slotName, simulate);
+            handler.handleRecipeInner(io, recipe, left, simulate);
             if (left.isEmpty()) return null;
         }
         return left;
