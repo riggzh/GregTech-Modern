@@ -36,6 +36,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
@@ -55,7 +56,7 @@ public class SteamParallelMultiblockMachine extends WorkableMultiblockMachine im
     @Override
     public void onStructureFormed() {
         super.onStructureFormed();
-        var handlers = capabilitiesProxy.get(IO.IN).stream().flatMap(rhl -> rhl.getCapability(FluidRecipeCapability.CAP).stream()).toList();
+        var handlers = capabilitiesProxy.get(IO.IN).stream().flatMap(rhl -> rhl.getCapability(FluidRecipeCapability.CAP).stream()).collect(Collectors.toList());
         if (handlers.isEmpty()) return;
         var itr = handlers.iterator();
         while (itr.hasNext()) {

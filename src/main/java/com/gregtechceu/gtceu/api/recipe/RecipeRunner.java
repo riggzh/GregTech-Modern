@@ -56,7 +56,7 @@ class RecipeRunner {
         this.chanceCaches = chanceCaches;
         this.capabilityProxies = holder.getCapabilitiesProxy();
         this.recipeContents = new IdentityHashMap<>();
-        this.searchRecipeContents = new IdentityHashMap<>();
+        this.searchRecipeContents = simulated ? recipeContents : new IdentityHashMap<>();
         this.simulated = simulated;
     }
 
@@ -68,6 +68,8 @@ class RecipeRunner {
 
         fillContentMatchList(entries);
 
+        if(searchRecipeContents.isEmpty())
+            return new RecipeHandlingResult(null, null, RecipeHandler.ActionResult.PASS_NO_CONTENTS);
 
         return this.handleContents();
     }
@@ -139,7 +141,6 @@ class RecipeRunner {
     }
 
     private RecipeHandlingResult handleContentsInternal(IO capIO) {
-
         // noinspection DataFlowIssue checked above.
         var handlers = new ArrayList<>(capabilityProxies.get(capIO));
 

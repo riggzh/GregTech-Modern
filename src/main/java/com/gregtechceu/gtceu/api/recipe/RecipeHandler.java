@@ -33,7 +33,7 @@ public class RecipeHandler {
 
     private static ActionResult matchRecipe(IRecipeCapabilityHolder holder, GTRecipe recipe, boolean tick) {
         if (!holder.hasCapabilityProxies())
-            return ActionResult.fail(() -> Component.translatable("gtceu.recipe_logic.no_capabilities"));
+            return ActionResult.FAIL_NO_CAPABILITIES;
 
         var result = handleRecipe(IO.IN, holder, recipe, tick ? recipe.tickInputs : recipe.inputs,
                 Collections.emptyMap(), tick, true);
@@ -47,7 +47,7 @@ public class RecipeHandler {
     public static ActionResult handleRecipeIO(IO io, IRecipeCapabilityHolder holder, GTRecipe recipe,
                                               Map<RecipeCapability<?>, Object2IntMap<?>> chanceCaches) {
         if (!holder.hasCapabilityProxies() || io == IO.BOTH)
-            return ActionResult.fail(() -> Component.translatable("gtceu.recipe_logic.no_capability_proxies"));
+            return ActionResult.FAIL_NO_CAPABILITIES;
         return handleRecipe(io, holder, recipe, io == IO.IN ? recipe.inputs : recipe.outputs, chanceCaches, false,
                 false);
     }
@@ -55,7 +55,7 @@ public class RecipeHandler {
     public static ActionResult handleTickRecipeIO(IO io, IRecipeCapabilityHolder holder, GTRecipe recipe,
                                                   Map<RecipeCapability<?>, Object2IntMap<?>> chanceCaches) {
         if (!holder.hasCapabilityProxies() || io == IO.BOTH)
-            return ActionResult.fail(() -> Component.translatable("gtceu.recipe_logic.no_tick_capability_proxies"));
+            return ActionResult.FAIL_NO_CAPABILITIES;
         return handleRecipe(io, holder, recipe, io == IO.IN ? recipe.tickInputs : recipe.tickOutputs, chanceCaches,
                 true, false);
     }
@@ -72,19 +72,14 @@ public class RecipeHandler {
                                             Map<RecipeCapability<?>, Object2IntMap<?>> chanceCaches,
                                             boolean isTick, boolean simulated) {
         RecipeRunner runner = new RecipeRunner(recipe, io, isTick, holder, chanceCaches, simulated);
-        for (Map.Entry<RecipeCapability<?>, List<Content>> entry : contents.entrySet()) {
-            var handle = runner.handle(contents);
-            if (handle == null)
-                continue;
+        var handle = runner.handle(contents);
 
-            if (handle.content() != null) {
-                String key = "gtceu.recipe_logic.insufficient_" + (io == IO.IN ? "in" : "out");
-                return ActionResult.fail(() -> Component.translatable(key)
-                        .append(": ").append(handle.capability().getName()));
-            }
-            return handle.result();
+        if (handle == null || handle.content() != null) {
+            String key = "gtceu.recipe_logic.insufficient_" + (io == IO.IN ? "in" : "out");
+            return ActionResult.fail(() -> Component.translatable(key)
+                    .append(": ").append(handle.capability().getName()));
         }
-        return ActionResult.SUCCESS;
+        return handle.result();
 
         /*
          * RecipeRunner runner = new RecipeRunner(recipe, io, isTick, holder, chanceCaches, false);
@@ -336,6 +331,8 @@ public class RecipeHandler {
 
         public final static ActionResult SUCCESS = new ActionResult(true, null);
         public final static ActionResult FAIL_NO_REASON = new ActionResult(false, null);
+        public final static ActionResult PASS_NO_CONTENTS = new ActionResult(true, () -> Component.translatable("gtceu.recipe_logic.no_contents"));
+        public final static ActionResult FAIL_NO_CAPABILITIES = new ActionResult(false, () -> Component.translatable("gtceu.recipe_logic.no_capabilities"));
 
         public static ActionResult fail(@Nullable Supplier<Component> component) {
             return new ActionResult(false, component);

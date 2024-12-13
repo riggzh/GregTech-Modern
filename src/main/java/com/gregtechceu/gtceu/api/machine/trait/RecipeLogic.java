@@ -222,7 +222,17 @@ public class RecipeLogic extends MachineTrait implements IEnhancedManaged, IWork
     protected RecipeHandler.ActionResult checkRecipe(GTRecipe recipe) {
         var recipeConditions = RecipeHandler.checkConditions(recipe, this).stream().filter(v -> !v.isSuccess())
                 .findFirst();
-        return recipeConditions.orElseGet(() -> RecipeHandler.matchContents(this.machine, recipe));
+        if(recipeConditions.isPresent()) {
+            return recipeConditions.get();
+        }
+        var match = RecipeHandler.matchRecipe(this.machine, recipe);
+        var matchTick = RecipeHandler.matchTickRecipe(this.machine, recipe);
+        if(!match.isSuccess())
+            return match;
+        if(!matchTick.isSuccess())
+            return matchTick;
+        return RecipeHandler.ActionResult.SUCCESS;
+        //return recipeConditions.orElseGet(() -> RecipeHandler.matchContents(this.machine, recipe));
     }
 
     public boolean checkMatchedRecipeAvailable(GTRecipe match) {
