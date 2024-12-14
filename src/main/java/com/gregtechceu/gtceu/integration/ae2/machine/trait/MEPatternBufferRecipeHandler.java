@@ -169,6 +169,7 @@ public class MEPatternBufferRecipeHandler extends MachineTrait {
 
         @Override
         public boolean isDistinct() {
+            super.setDistinct(true);
             return true;
         }
 

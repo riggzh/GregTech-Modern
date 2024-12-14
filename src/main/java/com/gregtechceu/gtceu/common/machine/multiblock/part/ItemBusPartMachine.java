@@ -141,6 +141,7 @@ public class ItemBusPartMachine extends TieredIOPartMachine implements IDistinct
         getInventory().setDistinct(isDistinct);
         circuitInventory.setDistinct(isDistinct);
         combinedInventory.setDistinct(isDistinct);
+        getRecipeHandlers().setDistinct(isDistinct);
     }
 
     //////////////////////////////////////

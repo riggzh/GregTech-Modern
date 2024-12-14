@@ -382,7 +382,7 @@ public class ItemRecipeCapability extends RecipeCapability<Ingredient> {
                 ItemStackHashStrategy.comparingAllButCount());
         Object2IntMap<ItemStack> result = new Object2IntOpenHashMap<>();
 
-        List<IRecipeHandler<Ingredient>> recipeHandlerList = holder.getCapabilitiesFlat(IO.IN, ItemRecipeCapability.CAP).stream()
+        var recipeHandlerList = holder.getCapabilitiesFlat(IO.IN, ItemRecipeCapability.CAP).stream()
                 .filter(handler -> !handler.isProxy()).toList();
 
         for (IRecipeHandler<?> container : recipeHandlerList) {

@@ -69,6 +69,8 @@ public abstract class WorkableTieredMachine extends TieredEnergyMachine implemen
     public final NotifiableComputationContainer exportComputation;
     @Getter
     protected final Map<IO, List<RecipeHandlerList>> capabilitiesProxy;
+    @Getter
+    protected Map<IO, Map<RecipeCapability<?>, List<IRecipeHandler<?>>>> capabilitiesFlat;
     @Persisted
     @Getter
     protected int overclockTier;
@@ -88,6 +90,7 @@ public abstract class WorkableTieredMachine extends TieredEnergyMachine implemen
         this.activeRecipeType = 0;
         this.tankScalingFunction = tankScalingFunction;
         this.capabilitiesProxy = new Object2ObjectOpenHashMap<>();
+        this.capabilitiesFlat = new Object2ObjectOpenHashMap<>();
         this.traitSubscriptions = new ArrayList<>();
         this.recipeLogic = createRecipeLogic(args);
         this.importItems = createImportItemHandler(args);
@@ -169,6 +172,8 @@ public abstract class WorkableTieredMachine extends TieredEnergyMachine implemen
         for (MachineTrait trait : getTraits()) {
             if (trait instanceof IRecipeHandlerTrait<?> handlerTrait) {
                 ioTraits.computeIfAbsent(handlerTrait.getHandlerIO(), i -> new ArrayList<>()).add(handlerTrait);
+                capabilitiesFlat.computeIfAbsent(handlerTrait.getHandlerIO(), i -> new IdentityHashMap<>())
+                        .computeIfAbsent(handlerTrait.getCapability(), i -> new ArrayList<>()).add(handlerTrait);
             }
         }
 
@@ -185,6 +190,8 @@ public abstract class WorkableTieredMachine extends TieredEnergyMachine implemen
         super.onUnload();
         traitSubscriptions.forEach(ISubscription::unsubscribe);
         traitSubscriptions.clear();
+        capabilitiesProxy.clear();
+        capabilitiesFlat.clear();
         recipeLogic.inValid();
     }
 

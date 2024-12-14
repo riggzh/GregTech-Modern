@@ -61,11 +61,15 @@ public class RecipeHandlerList {
     }
 
     public Map<RecipeCapability<?>, List> handleRecipe(IO io, GTRecipe recipe, Map<RecipeCapability<?>, List> contents, boolean simulate) {
+        if(handlerMap.isEmpty()) return contents;
         var copy = new IdentityHashMap<>(contents);
         var it = copy.entrySet().iterator();
         while(it.hasNext()) {
             var entry = it.next();
-            for(var handler : handlerMap.get(entry.getKey())) {
+            var handlerList = handlerMap.get(entry.getKey());
+            if(handlerList == null)
+                continue;
+            for(var handler : handlerList) {
                 var left = handler.handleRecipe(io, recipe, entry.getValue(), simulate);
                 if(left == null) {
                     it.remove();

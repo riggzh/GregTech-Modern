@@ -82,6 +82,8 @@ public abstract class SteamWorkableMachine extends SteamMachine
     protected boolean previouslyMuffled = true;
     @Getter
     protected final Map<IO, List<RecipeHandlerList>> capabilitiesProxy;
+    @Getter
+    protected Map<IO, Map<RecipeCapability<?>, List<IRecipeHandler<?>>>> capabilitiesFlat;
     protected final List<ISubscription> traitSubscriptions;
 
     public SteamWorkableMachine(IMachineBlockEntity holder, boolean isHighPressure, Object... args) {
@@ -90,6 +92,7 @@ public abstract class SteamWorkableMachine extends SteamMachine
         this.activeRecipeType = 0;
         this.recipeLogic = createRecipeLogic(args);
         this.capabilitiesProxy = new Object2ObjectOpenHashMap<>();
+        this.capabilitiesFlat = new Object2ObjectOpenHashMap<>();
         this.traitSubscriptions = new ArrayList<>();
         this.outputFacing = hasFrontFacing() ? getFrontFacing().getOpposite() : Direction.UP;
     }
@@ -111,6 +114,8 @@ public abstract class SteamWorkableMachine extends SteamMachine
         for (MachineTrait trait : getTraits()) {
             if (trait instanceof IRecipeHandlerTrait<?> handlerTrait) {
                 ioTraits.computeIfAbsent(handlerTrait.getHandlerIO(), i -> new ArrayList<>()).add(handlerTrait);
+                capabilitiesFlat.computeIfAbsent(handlerTrait.getHandlerIO(), i -> new IdentityHashMap<>())
+                        .computeIfAbsent(handlerTrait.getCapability(), i -> new ArrayList<>()).add(handlerTrait);
             }
         }
 
@@ -131,6 +136,8 @@ public abstract class SteamWorkableMachine extends SteamMachine
         super.onUnload();
         traitSubscriptions.forEach(ISubscription::unsubscribe);
         traitSubscriptions.clear();
+        capabilitiesProxy.clear();
+        capabilitiesFlat.clear();
         recipeLogic.inValid();
     }
 

@@ -119,6 +119,8 @@ public class MinerLogic extends RecipeLogic implements IRecipeCapabilityHolder {
     private boolean isInventoryFull;
     @Getter
     private final Map<IO, List<RecipeHandlerList>> capabilitiesProxy;
+    @Getter
+    protected Map<IO, Map<RecipeCapability<?>, List<IRecipeHandler<?>>>> capabilitiesFlat;
     private final ItemRecipeHandler inputItemHandler, outputItemHandler;
     private final IgnoreEnergyRecipeHandler inputEnergyHandler;
 
@@ -141,6 +143,7 @@ public class MinerLogic extends RecipeLogic implements IRecipeCapabilityHolder {
         this.pickaxeTool = GTItems.TOOL_ITEMS.get(GTMaterials.Neutronium, GTToolType.PICKAXE).get().get();
         this.pickaxeTool.enchant(Enchantments.BLOCK_FORTUNE, fortune);
         this.capabilitiesProxy = new Object2ObjectOpenHashMap<>();
+        this.capabilitiesFlat = new Object2ObjectOpenHashMap<>();
         this.inputItemHandler = new ItemRecipeHandler(IO.IN,
                 machine.getRecipeType().getMaxInputs(ItemRecipeCapability.CAP));
         this.outputItemHandler = new ItemRecipeHandler(IO.OUT,
@@ -155,6 +158,11 @@ public class MinerLogic extends RecipeLogic implements IRecipeCapabilityHolder {
 
         this.capabilitiesProxy.put(IO.IN, List.of(inHandlers));
         this.capabilitiesProxy.put(IO.OUT, List.of(outHandlers));
+        var inMap = this.capabilitiesFlat.put(IO.IN, new Object2ObjectOpenHashMap<>());
+        var outMap = this.capabilitiesFlat.put(IO.OUT, new Object2ObjectOpenHashMap<>());
+        inMap.put(ItemRecipeCapability.CAP, List.of(inputItemHandler));
+        inMap.put(EURecipeCapability.CAP, List.of(inputEnergyHandler));
+        outMap.put(ItemRecipeCapability.CAP, List.of(outputItemHandler));
     }
 
     @Override

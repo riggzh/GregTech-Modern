@@ -41,6 +41,8 @@ public class MultiblockPartMachine extends MetaMachine implements IMultiPart {
     @RequireRerender
     protected final Set<BlockPos> controllerPositions;
 
+    protected RecipeHandlerList handlerList;
+
     public MultiblockPartMachine(IMachineBlockEntity holder) {
         super(holder);
         this.controllerPositions = new HashSet<>();
@@ -77,14 +79,17 @@ public class MultiblockPartMachine extends MetaMachine implements IMultiPart {
     }
 
     public RecipeHandlerList getRecipeHandlers() {
-        var a = traits.stream().filter(IRecipeHandlerTrait.class::isInstance).map(IRecipeHandlerTrait.class::cast)
-                .toList();
-        if(a.isEmpty()) {
-            return new RecipeHandlerList(IO.NONE);
+        if(handlerList == null) {
+            var a = traits.stream().filter(IRecipeHandlerTrait.class::isInstance).map(IRecipeHandlerTrait.class::cast)
+                    .toList();
+            if (a.isEmpty()) {
+                handlerList = new RecipeHandlerList(IO.NONE);
+                return handlerList;
+            }
+            handlerList = new RecipeHandlerList(a.get(0).getHandlerIO());
+            handlerList.addHandler(a.toArray(new IRecipeHandler[0]));
         }
-        var l = new RecipeHandlerList(a.get(0).getHandlerIO());
-        l.addHandler(a.toArray(new IRecipeHandler[0]));
-        return l;
+        return handlerList;
     }
 
     @Override

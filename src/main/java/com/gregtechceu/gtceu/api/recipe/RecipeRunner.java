@@ -130,17 +130,20 @@ class RecipeRunner {
 
     @Nullable
     private RecipeHandlingResult handleContents() {
+        if(recipeContents.isEmpty()) {
+            return new RecipeHandlingResult(null, null, RecipeHandler.ActionResult.SUCCESS);
+        }
         var result = handleContentsInternal(io);
         if (!result.result.isSuccess()) {
             return result;
-        }
-        if(recipeContents.isEmpty()) {
-            return new RecipeHandlingResult(null, null, RecipeHandler.ActionResult.SUCCESS);
         }
         return handleContentsInternal(IO.BOTH);
     }
 
     private RecipeHandlingResult handleContentsInternal(IO capIO) {
+        if(!capabilityProxies.containsKey(capIO))
+            return new RecipeHandlingResult(null, null, RecipeHandler.ActionResult.SUCCESS);
+
         // noinspection DataFlowIssue checked above.
         var handlers = new ArrayList<>(capabilityProxies.get(capIO));
 
@@ -162,6 +165,7 @@ class RecipeRunner {
 
         if(!handled) {
             for(var handler : handlers) {
+                if(handler.isDistinct()) continue;
                 if(!recipeContents.isEmpty()) {
                     recipeContents = handler.handleRecipe(io, recipe, recipeContents, simulated);
                 }

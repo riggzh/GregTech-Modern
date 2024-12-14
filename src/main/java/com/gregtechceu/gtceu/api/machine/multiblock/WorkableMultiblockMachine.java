@@ -69,6 +69,8 @@ public abstract class WorkableMultiblockMachine extends MultiblockControllerMach
     private int activeRecipeType;
     @Getter
     protected final Map<IO, List<RecipeHandlerList>> capabilitiesProxy;
+    @Getter
+    protected Map<IO, Map<RecipeCapability<?>, List<IRecipeHandler<?>>>> capabilitiesFlat;
     protected final List<ISubscription> traitSubscriptions;
     @Getter
     @Setter
@@ -86,6 +88,7 @@ public abstract class WorkableMultiblockMachine extends MultiblockControllerMach
         this.activeRecipeType = 0;
         this.recipeLogic = createRecipeLogic(args);
         this.capabilitiesProxy = new Object2ObjectOpenHashMap<>();
+        this.capabilitiesFlat = new Object2ObjectOpenHashMap<>();
         this.traitSubscriptions = new ArrayList<>();
     }
 
@@ -119,6 +122,7 @@ public abstract class WorkableMultiblockMachine extends MultiblockControllerMach
         // attach parts' traits
         activeBlocks = getMultiblockState().getMatchContext().getOrDefault("vaBlocks", LongSets.emptySet());
         capabilitiesProxy.clear();
+        capabilitiesFlat.clear();
         traitSubscriptions.forEach(ISubscription::unsubscribe);
         traitSubscriptions.clear();
         Map<Long, IO> ioMap = getMultiblockState().getMatchContext().getOrCreate("ioMap", Long2ObjectMaps::emptyMap);
@@ -130,6 +134,10 @@ public abstract class WorkableMultiblockMachine extends MultiblockControllerMach
             if (io != IO.BOTH && handlerList.getHandlerIO() != IO.BOTH && io != handlerList.getHandlerIO()) continue;
 
             capabilitiesProxy.computeIfAbsent(handlerList.getHandlerIO(), i -> new ArrayList<>()).add(handlerList);
+            var inner = capabilitiesFlat.computeIfAbsent(handlerList.getHandlerIO(), i -> new Object2ObjectOpenHashMap<>());
+            for(var cap : handlerList.handlerMap.entrySet()) {
+                inner.computeIfAbsent(cap.getKey(), i -> new ArrayList<>()).addAll(cap.getValue());
+            }
             traitSubscriptions.addAll(handlerList.addChangeListeners(recipeLogic::updateTickSubscription));
         }
 
@@ -139,6 +147,8 @@ public abstract class WorkableMultiblockMachine extends MultiblockControllerMach
         for (MachineTrait trait : getTraits()) {
             if (trait instanceof IRecipeHandlerTrait<?> handlerTrait) {
                 ioTraits.computeIfAbsent(handlerTrait.getHandlerIO(), i -> new ArrayList<>()).add(handlerTrait);
+                capabilitiesFlat.computeIfAbsent(handlerTrait.getHandlerIO(), i -> new IdentityHashMap<>())
+                        .computeIfAbsent(handlerTrait.getCapability(), i -> new ArrayList<>()).add(handlerTrait);
             }
         }
 
@@ -146,6 +156,10 @@ public abstract class WorkableMultiblockMachine extends MultiblockControllerMach
             RecipeHandlerList handlerList = new RecipeHandlerList(entry.getKey());
             handlerList.addHandler(entry.getValue().toArray(new IRecipeHandler[0]));
             capabilitiesProxy.computeIfAbsent(entry.getKey(), i -> new ArrayList<>()).add(handlerList);
+            var inner = capabilitiesFlat.computeIfAbsent(entry.getKey(), i -> new Object2ObjectOpenHashMap<>());
+            for(var cap : handlerList.handlerMap.entrySet()) {
+                inner.computeIfAbsent(cap.getKey(), i -> new ArrayList<>()).addAll(cap.getValue());
+            }
             traitSubscriptions.addAll(handlerList.addChangeListeners(recipeLogic::updateTickSubscription));
         }
         // schedule recipe logic
@@ -158,6 +172,7 @@ public abstract class WorkableMultiblockMachine extends MultiblockControllerMach
         updateActiveBlocks(false);
         activeBlocks = null;
         capabilitiesProxy.clear();
+        capabilitiesFlat.clear();
         traitSubscriptions.forEach(ISubscription::unsubscribe);
         traitSubscriptions.clear();
         // reset recipe Logic
@@ -170,6 +185,7 @@ public abstract class WorkableMultiblockMachine extends MultiblockControllerMach
         updateActiveBlocks(false);
         activeBlocks = null;
         capabilitiesProxy.clear();
+        capabilitiesFlat.clear();
         traitSubscriptions.forEach(ISubscription::unsubscribe);
         traitSubscriptions.clear();
         // fine some parts invalid now.

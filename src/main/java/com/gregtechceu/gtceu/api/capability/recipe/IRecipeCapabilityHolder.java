@@ -1,6 +1,7 @@
 package com.gregtechceu.gtceu.api.capability.recipe;
 
 import com.google.common.collect.Table;
+import com.gregtechceu.gtceu.api.machine.trait.IRecipeHandlerTrait;
 import com.gregtechceu.gtceu.api.machine.trait.RecipeHandlerList;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,8 +18,12 @@ public interface IRecipeCapabilityHolder {
     @NotNull
     Map<IO, List<RecipeHandlerList>> getCapabilitiesProxy();
 
-    default <T> List<IRecipeHandler<T>> getCapabilitiesFlat(IO io, RecipeCapability<T> cap) {
-        return getCapabilitiesProxy().getOrDefault(io, Collections.emptyList())
-                    .stream().flatMap(rhl -> rhl.getCapability(cap).stream()).map(i -> (IRecipeHandler<T>)i).toList();
+    Map<IO, Map<RecipeCapability<?>, List<IRecipeHandler<?>>>> getCapabilitiesFlat();
+
+    default List<IRecipeHandler<?>> getCapabilitiesFlat(IO io, RecipeCapability<?> cap) {
+        if(getCapabilitiesProxy().get(io) == null) {
+            return Collections.emptyList();
+        }
+        return getCapabilitiesFlat().get(io).get(cap);
     }
 }
