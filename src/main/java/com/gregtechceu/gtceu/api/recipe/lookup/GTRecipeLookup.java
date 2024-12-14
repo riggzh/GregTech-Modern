@@ -58,7 +58,7 @@ public class GTRecipeLookup {
         int totalSize = 0;
         var recipeList = holder.getCapabilitiesProxy().get(IO.IN).stream().toList();
 
-        for(var handler : recipeList) {
+        for (var handler : recipeList) {
             for (var entries : handler.handlerMap.entrySet()) {
                 int size = 0;
                 if (!entries.getKey().isRecipeSearchFilter()) {
@@ -428,11 +428,10 @@ public class GTRecipeLookup {
      */
     @NotNull
     protected List<List<AbstractMapIngredient>> fromHolder(@NotNull IRecipeCapabilityHolder r) {
-
         var recipeList = r.getCapabilitiesProxy().get(IO.IN).stream().toList();
         int size = 0;
-        for(var handler : recipeList) {
-            for(var entry : handler.handlerMap.entrySet()) {
+        for (var handler : recipeList) {
+            for (var entry : handler.handlerMap.entrySet()) {
                 size += entry.getValue().size();
             }
         }

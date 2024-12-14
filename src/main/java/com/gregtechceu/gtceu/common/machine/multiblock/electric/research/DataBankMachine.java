@@ -74,7 +74,7 @@ public class DataBankMachine extends WorkableElectricMultiblockMachine
 
             handlerList.getCapability(EURecipeCapability.CAP).stream()
                     .filter(v -> v instanceof IEnergyContainer)
-                    .forEach(v -> energyContainers.add((IEnergyContainer)v));
+                    .forEach(v -> energyContainers.add((IEnergyContainer) v));
         }
         this.energyContainer = new EnergyContainerList(energyContainers);
         this.energyUsage = calculateEnergyUsage();

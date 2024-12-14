@@ -186,7 +186,7 @@ public class CleanroomMachine extends WorkableElectricMultiblockMachine
 
             handlerList.getCapability(EURecipeCapability.CAP).stream()
                     .filter(v -> v instanceof IEnergyContainer)
-                    .forEach(v -> energyContainers.add((IEnergyContainer)v));
+                    .forEach(v -> energyContainers.add((IEnergyContainer) v));
 
             if (part instanceof IMaintenanceMachine maintenanceMachine) {
                 getRecipeLogic().setMaintenanceMachine(maintenanceMachine);

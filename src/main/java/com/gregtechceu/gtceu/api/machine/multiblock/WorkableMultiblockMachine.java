@@ -23,15 +23,13 @@ import com.lowdragmc.lowdraglib.syncdata.annotation.DescSynced;
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 
-import com.google.common.collect.Table;
-import com.google.common.collect.Tables;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMaps;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.longs.LongSets;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
@@ -134,8 +132,9 @@ public abstract class WorkableMultiblockMachine extends MultiblockControllerMach
             if (io != IO.BOTH && handlerList.getHandlerIO() != IO.BOTH && io != handlerList.getHandlerIO()) continue;
 
             capabilitiesProxy.computeIfAbsent(handlerList.getHandlerIO(), i -> new ArrayList<>()).add(handlerList);
-            var inner = capabilitiesFlat.computeIfAbsent(handlerList.getHandlerIO(), i -> new Object2ObjectOpenHashMap<>());
-            for(var cap : handlerList.handlerMap.entrySet()) {
+            var inner = capabilitiesFlat.computeIfAbsent(handlerList.getHandlerIO(),
+                    i -> new Object2ObjectOpenHashMap<>());
+            for (var cap : handlerList.handlerMap.entrySet()) {
                 inner.computeIfAbsent(cap.getKey(), i -> new ArrayList<>()).addAll(cap.getValue());
             }
             traitSubscriptions.addAll(handlerList.addChangeListeners(recipeLogic::updateTickSubscription));
@@ -152,12 +151,12 @@ public abstract class WorkableMultiblockMachine extends MultiblockControllerMach
             }
         }
 
-        for(var entry : ioTraits.entrySet()) {
+        for (var entry : ioTraits.entrySet()) {
             RecipeHandlerList handlerList = new RecipeHandlerList(entry.getKey());
             handlerList.addHandler(entry.getValue().toArray(new IRecipeHandler[0]));
             capabilitiesProxy.computeIfAbsent(entry.getKey(), i -> new ArrayList<>()).add(handlerList);
             var inner = capabilitiesFlat.computeIfAbsent(entry.getKey(), i -> new Object2ObjectOpenHashMap<>());
-            for(var cap : handlerList.handlerMap.entrySet()) {
+            for (var cap : handlerList.handlerMap.entrySet()) {
                 inner.computeIfAbsent(cap.getKey(), i -> new ArrayList<>()).addAll(cap.getValue());
             }
             traitSubscriptions.addAll(handlerList.addChangeListeners(recipeLogic::updateTickSubscription));

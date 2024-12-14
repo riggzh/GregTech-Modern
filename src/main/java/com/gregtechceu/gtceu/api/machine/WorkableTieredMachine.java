@@ -12,8 +12,6 @@ import com.lowdragmc.lowdraglib.syncdata.annotation.DescSynced;
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder;
 
-import com.google.common.collect.Table;
-import com.google.common.collect.Tables;
 import com.mojang.blaze3d.MethodsReturnNonnullByDefault;
 import it.unimi.dsi.fastutil.ints.Int2LongFunction;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -177,7 +175,7 @@ public abstract class WorkableTieredMachine extends TieredEnergyMachine implemen
             }
         }
 
-        for(var entry : ioTraits.entrySet()) {
+        for (var entry : ioTraits.entrySet()) {
             RecipeHandlerList handlerList = new RecipeHandlerList(entry.getKey());
             handlerList.addHandler(entry.getValue().toArray(new IRecipeHandler[0]));
             capabilitiesProxy.computeIfAbsent(entry.getKey(), i -> new ArrayList<>()).add(handlerList);

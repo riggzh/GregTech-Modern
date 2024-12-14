@@ -113,7 +113,7 @@ public class FusionReactorMachine extends WorkableElectricMultiblockMachine impl
 
             handlerList.getCapability(EURecipeCapability.CAP).stream()
                     .filter(v -> v instanceof IEnergyContainer)
-                    .forEach(v -> energyContainers.add((IEnergyContainer)v));
+                    .forEach(v -> energyContainers.add((IEnergyContainer) v));
             traitSubscriptions.addAll(handlerList.addChangeListeners(this::updatePreHeatSubscription));
         }
         this.inputEnergyContainers = new EnergyContainerList(energyContainers);

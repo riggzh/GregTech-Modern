@@ -331,8 +331,10 @@ public class RecipeHandler {
 
         public final static ActionResult SUCCESS = new ActionResult(true, null);
         public final static ActionResult FAIL_NO_REASON = new ActionResult(false, null);
-        public final static ActionResult PASS_NO_CONTENTS = new ActionResult(true, () -> Component.translatable("gtceu.recipe_logic.no_contents"));
-        public final static ActionResult FAIL_NO_CAPABILITIES = new ActionResult(false, () -> Component.translatable("gtceu.recipe_logic.no_capabilities"));
+        public final static ActionResult PASS_NO_CONTENTS = new ActionResult(true,
+                () -> Component.translatable("gtceu.recipe_logic.no_contents"));
+        public final static ActionResult FAIL_NO_CAPABILITIES = new ActionResult(false,
+                () -> Component.translatable("gtceu.recipe_logic.no_capabilities"));
 
         public static ActionResult fail(@Nullable Supplier<Component> component) {
             return new ActionResult(false, component);

@@ -1,14 +1,11 @@
 package com.gregtechceu.gtceu.utils;
 
 import com.gregtechceu.gtceu.api.capability.recipe.IO;
-import com.gregtechceu.gtceu.api.capability.recipe.IRecipeHandler;
-import com.gregtechceu.gtceu.api.capability.recipe.RecipeCapability;
 import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity;
 import com.gregtechceu.gtceu.api.machine.WorkableTieredMachine;
 import com.gregtechceu.gtceu.api.machine.feature.IRecipeLogicMachine;
-
-import com.google.common.collect.Table;
 import com.gregtechceu.gtceu.api.machine.trait.RecipeHandlerList;
+
 import it.unimi.dsi.fastutil.ints.Int2LongFunction;
 
 import java.util.List;

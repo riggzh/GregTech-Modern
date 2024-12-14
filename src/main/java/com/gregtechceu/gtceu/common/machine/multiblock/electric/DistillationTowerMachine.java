@@ -95,10 +95,10 @@ public class DistillationTowerMachine extends WorkableElectricMultiblockMachine
                 if (part.self().getPos().getY() == y) {
                     part.getRecipeHandlers().handlerMap.forEach((cap, handler) -> {
                         boolean found = false;
-                        if(handler instanceof IFluidHandler fluidHandler) {
+                        if (handler instanceof IFluidHandler fluidHandler) {
                             found = true;
                             fluidOutputs.add(fluidHandler);
-                            if(firstValid == null) {
+                            if (firstValid == null) {
                                 firstValid = fluidHandler;
                             }
                         } else {
@@ -106,14 +106,16 @@ public class DistillationTowerMachine extends WorkableElectricMultiblockMachine
                         }
                     });
 
-                    /*part.getRecipeHandlers().stream()
-                            .filter(IFluidHandler.class::isInstance)
-                            .findFirst()
-                            .ifPresentOrElse(h -> {
-                                fluidOutputs.add((IFluidHandler) h);
-                                if (firstValid == null) firstValid = (IFluidHandler) h;
-                            },
-                                    () -> fluidOutputs.add(VoidFluidHandler.INSTANCE));*/
+                    /*
+                     * part.getRecipeHandlers().stream()
+                     * .filter(IFluidHandler.class::isInstance)
+                     * .findFirst()
+                     * .ifPresentOrElse(h -> {
+                     * fluidOutputs.add((IFluidHandler) h);
+                     * if (firstValid == null) firstValid = (IFluidHandler) h;
+                     * },
+                     * () -> fluidOutputs.add(VoidFluidHandler.INSTANCE));
+                     */
 
                     outputIndex++;
                 } else if (part.self().getPos().getY() > y) {

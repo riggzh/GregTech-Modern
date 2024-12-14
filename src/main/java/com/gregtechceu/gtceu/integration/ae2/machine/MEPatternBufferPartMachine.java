@@ -179,16 +179,15 @@ public class MEPatternBufferPartMachine extends MEBusPartMachine
                 }
             }));
         }
-        getRecipeHandlers().handlerMap.forEach((cap,handler) -> handler.stream()
+        getRecipeHandlers().handlerMap.forEach((cap, handler) -> handler.stream()
                 .filter(v -> v instanceof IRecipeHandlerTrait)
                 .forEach(u -> ((IRecipeHandlerTrait<?>) u).addChangedListener(() -> getProxies().forEach(proxy -> {
-                        if(cap == ItemRecipeCapability.CAP) {
-                            proxy.itemProxyHandler.notifyListeners();
-                        } else if(cap == FluidRecipeCapability.CAP) {
-                            proxy.fluidProxyHandler.notifyListeners();
-                        }
-                })))
-        );
+                    if (cap == ItemRecipeCapability.CAP) {
+                        proxy.itemProxyHandler.notifyListeners();
+                    } else if (cap == FluidRecipeCapability.CAP) {
+                        proxy.fluidProxyHandler.notifyListeners();
+                    }
+                }))));
     }
 
     @Override

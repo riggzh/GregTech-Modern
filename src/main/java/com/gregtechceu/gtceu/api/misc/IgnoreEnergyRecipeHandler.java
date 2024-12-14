@@ -6,8 +6,6 @@ import com.gregtechceu.gtceu.api.capability.recipe.IRecipeHandler;
 import com.gregtechceu.gtceu.api.capability.recipe.RecipeCapability;
 import com.gregtechceu.gtceu.api.recipe.GTRecipe;
 
-import org.jetbrains.annotations.Nullable;
-
 import java.util.List;
 
 public class IgnoreEnergyRecipeHandler implements IRecipeHandler<Long> {

@@ -150,7 +150,7 @@ public class FluidRecipeCapability extends RecipeCapability<FluidIngredient> {
         int maxMultiplier = multiplier;
 
         OverlayedFluidHandler overlayedFluidHandler = new OverlayedFluidHandler(new FluidTransferList(
-                        holder.getCapabilitiesFlat(IO.OUT, FluidRecipeCapability.CAP).stream()
+                holder.getCapabilitiesFlat(IO.OUT, FluidRecipeCapability.CAP).stream()
                         .filter(IFluidTransfer.class::isInstance)
                         .map(IFluidTransfer.class::cast)
                         .toList()));
@@ -195,8 +195,7 @@ public class FluidRecipeCapability extends RecipeCapability<FluidIngredient> {
     @Override
     public int getMaxParallelRatio(IRecipeCapabilityHolder holder, GTRecipe recipe, int parallelAmount) {
         // Find all the fluids in the combined Fluid Input inventories and create oversized FluidStacks
-        Map<FluidKey, Long> fluidStacks = holder.
-                getCapabilitiesFlat(IO.IN, FluidRecipeCapability.CAP).stream()
+        Map<FluidKey, Long> fluidStacks = holder.getCapabilitiesFlat(IO.IN, FluidRecipeCapability.CAP).stream()
                 .map(container -> container.getContents().stream().filter(FluidStack.class::isInstance)
                         .map(FluidStack.class::cast).toList())
                 .flatMap(container -> GTHashMaps.fromFluidCollection(container).entrySet().stream())

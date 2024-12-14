@@ -14,7 +14,6 @@ import net.minecraft.world.item.crafting.Ingredient;
 
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.Supplier;

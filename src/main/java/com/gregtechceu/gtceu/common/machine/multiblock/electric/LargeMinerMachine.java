@@ -137,10 +137,10 @@ public class LargeMinerMachine extends WorkableElectricMultiblockMachine
 
             handlerList.getCapability(EURecipeCapability.CAP).stream()
                     .filter(v -> v instanceof IEnergyContainer)
-                    .forEach(v -> energyContainers.add((IEnergyContainer)v));
+                    .forEach(v -> energyContainers.add((IEnergyContainer) v));
             handlerList.getCapability(FluidRecipeCapability.CAP).stream()
                     .filter(v -> v instanceof IFluidHandler)
-                    .forEach(v -> fluidTanks.add((IFluidHandler)v));
+                    .forEach(v -> fluidTanks.add((IFluidHandler) v));
         }
         this.energyContainer = new EnergyContainerList(energyContainers);
         this.inputFluidInventory = new FluidTransferList(fluidTanks);

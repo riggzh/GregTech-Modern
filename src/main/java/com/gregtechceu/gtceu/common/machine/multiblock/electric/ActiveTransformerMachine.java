@@ -94,12 +94,12 @@ public class ActiveTransformerMachine extends WorkableElectricMultiblockMachine
 
             var containers = handlerList.getCapability(EURecipeCapability.CAP).stream()
                     .filter(v -> v instanceof IEnergyContainer)
-                    .map(v -> (IEnergyContainer)v)
+                    .map(v -> (IEnergyContainer) v)
                     .toList();
 
-            if(handlerList.getHandlerIO() == IO.IN) {
+            if (handlerList.getHandlerIO() == IO.IN) {
                 powerInput.addAll(containers);
-            } else if(handlerList.getHandlerIO() == IO.OUT) {
+            } else if (handlerList.getHandlerIO() == IO.OUT) {
                 powerOutput.addAll(containers);
             }
 

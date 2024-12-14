@@ -21,9 +21,6 @@ import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Objects;
-
 public class CannerLogic implements GTRecipeType.ICustomRecipeLogic {
 
     @Override

@@ -2,7 +2,6 @@ package com.gregtechceu.gtceu.api.recipe;
 
 import com.gregtechceu.gtceu.api.capability.recipe.IO;
 import com.gregtechceu.gtceu.api.capability.recipe.IRecipeCapabilityHolder;
-import com.gregtechceu.gtceu.api.capability.recipe.IRecipeHandler;
 import com.gregtechceu.gtceu.api.capability.recipe.RecipeCapability;
 import com.gregtechceu.gtceu.api.machine.trait.RecipeHandlerList;
 import com.gregtechceu.gtceu.api.recipe.chance.boost.ChanceBoostFunction;
@@ -10,9 +9,7 @@ import com.gregtechceu.gtceu.api.recipe.chance.logic.ChanceLogic;
 import com.gregtechceu.gtceu.api.recipe.content.Content;
 import com.gregtechceu.gtceu.api.recipe.content.ContentModifier;
 
-import com.google.common.collect.Table;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
@@ -42,9 +39,11 @@ class RecipeRunner {
     private Set<RecipeHandlerList> used;
     private Map<RecipeCapability<?>, List> recipeContents;
     private Map<RecipeCapability<?>, List> searchRecipeContents;
-    /*@Getter
-    private Map<IO, > contentMatchList;
-    private @UnknownNullability List searchingMatchList;*/
+    /*
+     * @Getter
+     * private Map<IO, > contentMatchList;
+     * private @UnknownNullability List searchingMatchList;
+     */
 
     public RecipeRunner(GTRecipe recipe, IO io, boolean isTick,
                         IRecipeCapabilityHolder holder, Map<RecipeCapability<?>, Object2IntMap<?>> chanceCaches,
@@ -64,11 +63,9 @@ class RecipeRunner {
     public RecipeHandlingResult handle(Map<RecipeCapability<?>, List<Content>> entries) {
         initState();
 
-
-
         fillContentMatchList(entries);
 
-        if(searchRecipeContents.isEmpty())
+        if (searchRecipeContents.isEmpty())
             return new RecipeHandlingResult(null, null, RecipeHandler.ActionResult.PASS_NO_CONTENTS);
 
         return this.handleContents();
@@ -76,8 +73,8 @@ class RecipeRunner {
 
     private void initState() {
         used = new HashSet<>();
-        //contentMatchList = new ArrayList<>();
-        //searchingMatchList = simulated ? contentMatchList : new ArrayList<>();
+        // contentMatchList = new ArrayList<>();
+        // searchingMatchList = simulated ? contentMatchList : new ArrayList<>();
     }
 
     /**
@@ -85,14 +82,14 @@ class RecipeRunner {
      */
     private void fillContentMatchList(Map<RecipeCapability<?>, List<Content>> entries) {
         ChanceBoostFunction function = recipe.getType().getChanceFunction();
-        for(var entry : entries.entrySet()) {
+        for (var entry : entries.entrySet()) {
             RecipeCapability<?> cap = entry.getKey();
             if (!cap.doMatchInRecipe()) {
                 continue;
             }
             ChanceLogic logic = recipe.getChanceLogicForCapability(cap, this.io, this.isTick);
             List<Content> chancedContents = new ArrayList<>();
-            if(entry.getValue().isEmpty()) continue;
+            if (entry.getValue().isEmpty()) continue;
             this.recipeContents.putIfAbsent(cap, new ArrayList<>());
             for (Content cont : entry.getValue()) {
                 this.searchRecipeContents.computeIfAbsent(cap, c -> new ArrayList<>()).add(cont.content);
@@ -112,7 +109,8 @@ class RecipeRunner {
                 int recipeTier = RecipeHelper.getPreOCRecipeEuTier(recipe);
                 int holderTier = holder.getChanceTier();
                 var cache = this.chanceCaches.get(cap);
-                chancedContents = logic.roll(chancedContents, function, recipeTier, holderTier, cache, recipe.parallels,
+                chancedContents = logic.roll(chancedContents, function, recipeTier, holderTier, cache,
+                        recipe.parallels,
                     cap);
 
                 if (chancedContents == null) return;
@@ -121,8 +119,8 @@ class RecipeRunner {
                 }
             }
 
-            if(!recipeContents.get(cap).isEmpty()) {}
-                //recipeContents.put(cap, recipeContents.get(cap).stream().map(cap::copyContent).toList());
+            if (!recipeContents.get(cap).isEmpty()) {}
+            // recipeContents.put(cap, recipeContents.get(cap).stream().map(cap::copyContent).toList());
             else
                 recipeContents.remove(cap);
         }
@@ -130,7 +128,7 @@ class RecipeRunner {
 
     @Nullable
     private RecipeHandlingResult handleContents() {
-        if(recipeContents.isEmpty()) {
+        if (recipeContents.isEmpty()) {
             return new RecipeHandlingResult(null, null, RecipeHandler.ActionResult.SUCCESS);
         }
         var result = handleContentsInternal(io);
@@ -141,27 +139,27 @@ class RecipeRunner {
     }
 
     private RecipeHandlingResult handleContentsInternal(IO capIO) {
-        if(!capabilityProxies.containsKey(capIO))
+        if (!capabilityProxies.containsKey(capIO))
             return new RecipeHandlingResult(null, null, RecipeHandler.ActionResult.SUCCESS);
 
         // noinspection DataFlowIssue checked above.
         var handlers = new ArrayList<>(capabilityProxies.get(capIO));
         List<RecipeHandlerList> distinct = new ArrayList<>(), nondistinct = new ArrayList<>();
-        for(var handler : handlers) {
-            if(handler.isDistinct())
+        for (var handler : handlers) {
+            if (handler.isDistinct())
                 distinct.add(handler);
             else
                 nondistinct.add(handler);
         }
 
-        //handlers.sort(IRecipeHandler.ENTRY_COMPARATOR);
+        // handlers.sort(IRecipeHandler.ENTRY_COMPARATOR);
 
         // handle distinct first
         boolean handled = false;
         for (var handler : distinct) {
             var res = handler.handleRecipe(io, recipe, searchRecipeContents, true);
             if (res.isEmpty()) {
-                if(!simulated) {
+                if (!simulated) {
                     handler.handleRecipe(io, recipe, recipeContents, false);
                 }
                 handled = true;
@@ -169,19 +167,19 @@ class RecipeRunner {
             }
         }
 
-        if(!handled) {
-            for(var handler : nondistinct) {
-                if(!recipeContents.isEmpty()) {
+        if (!handled) {
+            for (var handler : nondistinct) {
+                if (!recipeContents.isEmpty()) {
                     recipeContents = handler.handleRecipe(io, recipe, recipeContents, simulated);
                 }
-                if(recipeContents.isEmpty()) {
+                if (recipeContents.isEmpty()) {
                     handled = true;
                     break;
                 }
             }
         }
 
-        if(!handled) {
+        if (!handled) {
             for (var handler : distinct) {
                 if (!recipeContents.isEmpty()) {
                     var res = handler.handleRecipe(io, recipe, recipeContents, simulated);
@@ -193,13 +191,14 @@ class RecipeRunner {
             }
         }
 
-        if(handled) {
+        if (handled) {
             return new RecipeHandlingResult(null, null, RecipeHandler.ActionResult.SUCCESS);
         }
 
-        for(var entry : recipeContents.entrySet()) {
-            if(entry.getValue() != null && !entry.getValue().isEmpty()) {
-                return new RecipeHandlingResult(entry.getKey(), entry.getValue(), RecipeHandler.ActionResult.FAIL_NO_REASON);
+        for (var entry : recipeContents.entrySet()) {
+            if (entry.getValue() != null && !entry.getValue().isEmpty()) {
+                return new RecipeHandlingResult(entry.getKey(), entry.getValue(),
+                        RecipeHandler.ActionResult.FAIL_NO_REASON);
             }
         }
 

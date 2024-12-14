@@ -4,9 +4,9 @@ import com.gregtechceu.gtceu.api.capability.recipe.IO;
 import com.gregtechceu.gtceu.api.capability.recipe.IRecipeHandler;
 import com.gregtechceu.gtceu.api.capability.recipe.RecipeCapability;
 import com.gregtechceu.gtceu.api.recipe.GTRecipe;
-import com.gregtechceu.gtceu.api.recipe.RecipeHandler;
-import com.gregtechceu.gtceu.api.recipe.content.Content;
+
 import com.lowdragmc.lowdraglib.syncdata.ISubscription;
+
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,6 +14,7 @@ import lombok.Setter;
 import java.util.*;
 
 public class RecipeHandlerList {
+
     public Map<RecipeCapability<?>, List<IRecipeHandler<?>>> handlerMap = new Object2ObjectOpenHashMap<>();
     private IO io;
     @Setter
@@ -35,7 +36,7 @@ public class RecipeHandlerList {
     }
 
     public void addHandler(IRecipeHandler<?>... handlers) {
-        for(var handler : handlers) {
+        for (var handler : handlers) {
             handlerMap.computeIfAbsent(handler.getCapability(), c -> new ArrayList<>()).add(handler);
         }
     }
@@ -50,9 +51,9 @@ public class RecipeHandlerList {
 
     public List<ISubscription> addChangeListeners(Runnable listener) {
         List<ISubscription> ret = new ArrayList<>();
-        for(var handlerList : handlerMap.values()) {
-            for(var handler : handlerList) {
-                if(handler instanceof IRecipeHandlerTrait<?> handlerTrait) {
+        for (var handlerList : handlerMap.values()) {
+            for (var handler : handlerList) {
+                if (handler instanceof IRecipeHandlerTrait<?> handlerTrait) {
                     ret.add(handlerTrait.addChangedListener(listener));
                 }
             }
@@ -60,18 +61,19 @@ public class RecipeHandlerList {
         return ret;
     }
 
-    public Map<RecipeCapability<?>, List> handleRecipe(IO io, GTRecipe recipe, Map<RecipeCapability<?>, List> contents, boolean simulate) {
-        if(handlerMap.isEmpty()) return contents;
+    public Map<RecipeCapability<?>, List> handleRecipe(IO io, GTRecipe recipe, Map<RecipeCapability<?>, List> contents,
+                                                       boolean simulate) {
+        if (handlerMap.isEmpty()) return contents;
         var copy = new IdentityHashMap<>(contents);
         var it = copy.entrySet().iterator();
-        while(it.hasNext()) {
+        while (it.hasNext()) {
             var entry = it.next();
             var handlerList = handlerMap.get(entry.getKey());
-            if(handlerList == null)
+            if (handlerList == null)
                 continue;
-            for(var handler : handlerList) {
+            for (var handler : handlerList) {
                 var left = handler.handleRecipe(io, recipe, entry.getValue(), simulate);
-                if(left == null) {
+                if (left == null) {
                     it.remove();
                     break;
                 } else {

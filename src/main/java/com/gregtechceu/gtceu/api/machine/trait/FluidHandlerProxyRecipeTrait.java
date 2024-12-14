@@ -11,7 +11,6 @@ import com.gregtechceu.gtceu.api.recipe.ingredient.FluidIngredient;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import lombok.Getter;
 import lombok.Setter;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
