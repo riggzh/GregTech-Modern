@@ -2,6 +2,7 @@ package com.gregtechceu.gtceu.api.recipe.lookup;
 
 import com.gregtechceu.gtceu.GTCEu;
 import com.gregtechceu.gtceu.api.capability.recipe.*;
+import com.gregtechceu.gtceu.api.machine.trait.RecipeHandlerList;
 import com.gregtechceu.gtceu.api.recipe.GTRecipe;
 import com.gregtechceu.gtceu.api.recipe.GTRecipeType;
 import com.gregtechceu.gtceu.api.recipe.RecipeHandler;
@@ -56,7 +57,8 @@ public class GTRecipeLookup {
     protected List<List<AbstractMapIngredient>> prepareRecipeFind(@NotNull IRecipeCapabilityHolder holder) {
         // First, check if items and fluids are valid.
         int totalSize = 0;
-        var recipeList = holder.getCapabilitiesProxy().get(IO.IN).stream().toList();
+        List<RecipeHandlerList> recipeList = new ArrayList<>(
+                holder.getCapabilitiesProxy().getOrDefault(IO.IN, new ArrayList<>()));
 
         for (var handler : recipeList) {
             for (var entries : handler.handlerMap.entrySet()) {
