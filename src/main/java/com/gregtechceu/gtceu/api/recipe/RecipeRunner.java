@@ -39,7 +39,7 @@ class RecipeRunner {
 
     // These are only used to store mutable state during each invocation of handle()
     private RecipeCapability<?> capability;
-    private Set<IRecipeHandler<?>> used;
+    private Set<RecipeHandlerList> used;
     private Map<RecipeCapability<?>, List> recipeContents;
     private Map<RecipeCapability<?>, List> searchRecipeContents;
     /*@Getter
@@ -146,13 +146,19 @@ class RecipeRunner {
 
         // noinspection DataFlowIssue checked above.
         var handlers = new ArrayList<>(capabilityProxies.get(capIO));
+        List<RecipeHandlerList> distinct = new ArrayList<>(), nondistinct = new ArrayList<>();
+        for(var handler : handlers) {
+            if(handler.isDistinct())
+                distinct.add(handler);
+            else
+                nondistinct.add(handler);
+        }
 
         //handlers.sort(IRecipeHandler.ENTRY_COMPARATOR);
 
         // handle distinct first
         boolean handled = false;
-        for (var handler : handlers) {
-            if (!handler.isDistinct()) continue;
+        for (var handler : distinct) {
             var res = handler.handleRecipe(io, recipe, searchRecipeContents, true);
             if (res.isEmpty()) {
                 if(!simulated) {
@@ -164,14 +170,25 @@ class RecipeRunner {
         }
 
         if(!handled) {
-            for(var handler : handlers) {
-                if(handler.isDistinct()) continue;
+            for(var handler : nondistinct) {
                 if(!recipeContents.isEmpty()) {
                     recipeContents = handler.handleRecipe(io, recipe, recipeContents, simulated);
                 }
                 if(recipeContents.isEmpty()) {
                     handled = true;
                     break;
+                }
+            }
+        }
+
+        if(!handled) {
+            for (var handler : distinct) {
+                if (!recipeContents.isEmpty()) {
+                    var res = handler.handleRecipe(io, recipe, recipeContents, simulated);
+                    if (res.isEmpty()) {
+                        handled = true;
+                        break;
+                    }
                 }
             }
         }
