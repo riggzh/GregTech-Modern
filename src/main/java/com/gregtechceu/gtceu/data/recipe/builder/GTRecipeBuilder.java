@@ -87,10 +87,6 @@ public class GTRecipeBuilder {
     @Setter
     public boolean perTick;
     @Setter
-    public String slotName;
-    @Setter
-    public String uiName;
-    @Setter
     public int chance = ChanceLogic.getMaxChancedValue();
     @Setter
     public int maxChance = ChanceLogic.getMaxChancedValue();
@@ -154,8 +150,7 @@ public class GTRecipeBuilder {
         copy.chance = this.chance;
         copy.perTick = this.perTick;
         copy.isFuel = this.isFuel;
-        copy.uiName = this.uiName;
-        copy.slotName = this.slotName;
+        copy.recipeCategory = this.recipeCategory;
         copy.onSave = this.onSave;
         return copy;
     }
@@ -166,53 +161,53 @@ public class GTRecipeBuilder {
 
     public <T> GTRecipeBuilder input(RecipeCapability<T> capability, T obj) {
         (perTick ? tickInput : input).computeIfAbsent(capability, c -> new ArrayList<>())
-                .add(new Content(capability.of(obj), chance, maxChance, tierChanceBoost, slotName, uiName));
+                .add(new Content(capability.of(obj), chance, maxChance, tierChanceBoost));
         return this;
     }
 
     public <T> GTRecipeBuilder input(RecipeCapability<T> capability, T... obj) {
         (perTick ? tickInput : input).computeIfAbsent(capability, c -> new ArrayList<>()).addAll(Arrays.stream(obj)
                 .map(capability::of)
-                .map(o -> new Content(o, chance, maxChance, tierChanceBoost, slotName, uiName)).toList());
+                .map(o -> new Content(o, chance, maxChance, tierChanceBoost)).toList());
         return this;
     }
 
     public <T> GTRecipeBuilder output(RecipeCapability<T> capability, T obj) {
         (perTick ? tickOutput : output).computeIfAbsent(capability, c -> new ArrayList<>())
-                .add(new Content(capability.of(obj), chance, maxChance, tierChanceBoost, slotName, uiName));
+                .add(new Content(capability.of(obj), chance, maxChance, tierChanceBoost));
         return this;
     }
 
     public <T> GTRecipeBuilder output(RecipeCapability<T> capability, T... obj) {
         (perTick ? tickOutput : output).computeIfAbsent(capability, c -> new ArrayList<>()).addAll(Arrays.stream(obj)
                 .map(capability::of)
-                .map(o -> new Content(o, chance, maxChance, tierChanceBoost, slotName, uiName)).toList());
+                .map(o -> new Content(o, chance, maxChance, tierChanceBoost)).toList());
         return this;
     }
 
     public <T> GTRecipeBuilder inputs(RecipeCapability<T> capability, Object obj) {
         (perTick ? tickInput : input).computeIfAbsent(capability, c -> new ArrayList<>())
-                .add(new Content(capability.of(obj), chance, maxChance, tierChanceBoost, slotName, uiName));
+                .add(new Content(capability.of(obj), chance, maxChance, tierChanceBoost));
         return this;
     }
 
     public <T> GTRecipeBuilder inputs(RecipeCapability<T> capability, Object... obj) {
         (perTick ? tickInput : input).computeIfAbsent(capability, c -> new ArrayList<>()).addAll(Arrays.stream(obj)
                 .map(capability::of)
-                .map(o -> new Content(o, chance, maxChance, tierChanceBoost, slotName, uiName)).toList());
+                .map(o -> new Content(o, chance, maxChance, tierChanceBoost)).toList());
         return this;
     }
 
     public <T> GTRecipeBuilder outputs(RecipeCapability<T> capability, Object obj) {
         (perTick ? tickOutput : output).computeIfAbsent(capability, c -> new ArrayList<>())
-                .add(new Content(capability.of(obj), chance, maxChance, tierChanceBoost, slotName, uiName));
+                .add(new Content(capability.of(obj), chance, maxChance, tierChanceBoost));
         return this;
     }
 
     public <T> GTRecipeBuilder outputs(RecipeCapability<T> capability, Object... obj) {
         (perTick ? tickOutput : output).computeIfAbsent(capability, c -> new ArrayList<>()).addAll(Arrays.stream(obj)
                 .map(capability::of)
-                .map(o -> new Content(o, chance, maxChance, tierChanceBoost, slotName, uiName)).toList());
+                .map(o -> new Content(o, chance, maxChance, tierChanceBoost)).toList());
         return this;
     }
 

@@ -104,7 +104,7 @@ public interface GTRecipeSchema {
             }
             if (map != null) {
                 for (Object object : obj) {
-                    map.add(capability, new Content(object, chance, maxChance, tierChanceBoost, null, null));
+                    map.add(capability, new Content(object, chance, maxChance, tierChanceBoost));
                 }
             }
             save();
@@ -122,7 +122,7 @@ public interface GTRecipeSchema {
             }
             if (map != null) {
                 for (Object object : obj) {
-                    map.add(capability, new Content(object, chance, maxChance, tierChanceBoost, null, null));
+                    map.add(capability, new Content(object, chance, maxChance, tierChanceBoost));
                 }
             }
             save();

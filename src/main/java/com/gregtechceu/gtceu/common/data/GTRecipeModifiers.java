@@ -205,6 +205,13 @@ public class GTRecipeModifiers {
             if (RecipeHelper.getRecipeEUtTier(recipe) > coilMachine.getTier()) {
                 return null;
             }
+
+            recipe.tickInputs.put(EURecipeCapability.CAP, List.of(new Content(
+                    applyCoilEUtDiscount(RecipeHelper.getInputEUt(recipe),
+                            blastFurnaceTemperature, recipe.data.getInt("ebf_temp")),
+                    ChanceLogic.getMaxChancedValue(), ChanceLogic.getMaxChancedValue(),
+                    0)));
+
             return RecipeHelper.applyOverclock(
                     new OverclockingLogic((p, r, maxVoltage) -> OverclockingLogic.heatingCoilOC(
                             params, result, maxVoltage,
@@ -255,7 +262,7 @@ public class GTRecipeModifiers {
             recipe.duration = duration;
             recipe.tickInputs.put(EURecipeCapability.CAP, List.of(new Content(eut,
                     ChanceLogic.getMaxChancedValue(), ChanceLogic.getMaxChancedValue(),
-                    0, null, null)));
+                    0)));
 
             var re = RecipeHelper.applyOverclock(new OverclockingLogic((p, r, maxVoltage) -> {
                 OverclockingLogic.NON_PERFECT_OVERCLOCK.getLogic()

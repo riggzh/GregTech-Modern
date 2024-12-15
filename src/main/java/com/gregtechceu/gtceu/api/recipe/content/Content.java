@@ -29,19 +29,12 @@ public class Content {
     public int chance;
     public int maxChance;
     public int tierChanceBoost;
-    @Nullable
-    public String slotName;
-    @Nullable
-    public String uiName;
 
-    public Content(Object content, int chance, int maxChance, int tierChanceBoost, @Nullable String slotName,
-                   @Nullable String uiName) {
+    public Content(Object content, int chance, int maxChance, int tierChanceBoost) {
         this.content = content;
         this.chance = chance;
         this.maxChance = maxChance;
         this.tierChanceBoost = fixBoost(tierChanceBoost);
-        this.slotName = slotName == null || slotName.isEmpty() ? null : slotName;
-        this.uiName = uiName == null || uiName.isEmpty() ? null : uiName;
     }
 
     public static <T> Codec<Content> codec(RecipeCapability<T> capability) {
@@ -52,19 +45,20 @@ public class Content {
                 ExtraCodecs.NON_NEGATIVE_INT.optionalFieldOf("maxChance", ChanceLogic.getMaxChancedValue())
                         .forGetter(val -> val.maxChance),
                 ExtraCodecs.NON_NEGATIVE_INT.optionalFieldOf("tierChanceBoost", 0)
-                        .forGetter(val -> val.tierChanceBoost),
-                Codec.STRING.optionalFieldOf("slotName", "").forGetter(val -> val.slotName != null ? val.slotName : ""),
-                Codec.STRING.optionalFieldOf("uiName", "").forGetter(val -> val.uiName != null ? val.uiName : ""))
+                        .forGetter(val -> val.tierChanceBoost))
                 .apply(instance, Content::new));
     }
 
     public Content copy(RecipeCapability<?> capability, @Nullable ContentModifier modifier) {
         if (modifier == null || chance == 0) {
-            return new Content(capability.copyContent(content), chance, maxChance, tierChanceBoost, slotName, uiName);
+            return new Content(capability.copyContent(content), chance, maxChance, tierChanceBoost);
         } else {
-            return new Content(capability.copyContent(content, modifier), chance, maxChance, tierChanceBoost, slotName,
-                    uiName);
+            return new Content(capability.copyContent(content, modifier), chance, maxChance, tierChanceBoost);
         }
+    }
+
+    public Content copyExplicit(RecipeCapability<?> capability, @Nullable ContentModifier modifier) {
+        return new Content(capability.copyContent(content, modifier), chance, maxChance, tierChanceBoost);
     }
 
     /**
@@ -187,8 +181,6 @@ public class Content {
                 ", chance=" + chance +
                 ", maxChance=" + maxChance +
                 ", tierChanceBoost=" + tierChanceBoost +
-                ", slotName='" + slotName + '\'' +
-                ", uiName='" + uiName + '\'' +
                 '}';
     }
 }
