@@ -155,8 +155,8 @@ public class MinerLogic extends RecipeLogic implements IRecipeCapabilityHolder {
 
         this.capabilitiesProxy.put(IO.IN, List.of(inHandlers));
         this.capabilitiesProxy.put(IO.OUT, List.of(outHandlers));
-        var inMap = this.capabilitiesFlat.put(IO.IN, new Object2ObjectOpenHashMap<>());
-        var outMap = this.capabilitiesFlat.put(IO.OUT, new Object2ObjectOpenHashMap<>());
+        var inMap = this.capabilitiesFlat.computeIfAbsent(IO.IN, k -> new Object2ObjectOpenHashMap<>());
+        var outMap = this.capabilitiesFlat.computeIfAbsent(IO.OUT, k -> new Object2ObjectOpenHashMap<>());
         inMap.put(ItemRecipeCapability.CAP, List.of(inputItemHandler));
         inMap.put(EURecipeCapability.CAP, List.of(inputEnergyHandler));
         outMap.put(ItemRecipeCapability.CAP, List.of(outputItemHandler));
