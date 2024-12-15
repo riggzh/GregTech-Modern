@@ -58,8 +58,7 @@ public class MEPatternBufferRecipeHandler extends MachineTrait {
         return (MEPatternBufferPartMachine) super.getMachine();
     }
 
-    public List<Ingredient> handleItemInner(
-                                            GTRecipe recipe, List<Ingredient> left, boolean simulate) {
+    public List<Ingredient> handleItemInner(GTRecipe recipe, List<Ingredient> left, boolean simulate) {
         var internalInv = getMachine().getInternalInventory();
         if (recipe.id.equals(lockedRecipeId) && lockedSlot >= 0) {
             return internalInv[lockedSlot].handleItemInternal(left, simulate);
@@ -72,7 +71,7 @@ public class MEPatternBufferRecipeHandler extends MachineTrait {
             contents = internalInv[i].handleItemInternal(contents, simulate);
             if (contents == null) {
                 this.lockedSlot = i;
-                return contents;
+                return null;
             }
             contents = copyIngredients(left);
         }
