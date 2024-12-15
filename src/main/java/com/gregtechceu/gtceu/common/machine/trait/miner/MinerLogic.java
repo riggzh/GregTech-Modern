@@ -11,7 +11,6 @@ import com.gregtechceu.gtceu.api.machine.trait.RecipeLogic;
 import com.gregtechceu.gtceu.api.misc.IgnoreEnergyRecipeHandler;
 import com.gregtechceu.gtceu.api.misc.ItemRecipeHandler;
 import com.gregtechceu.gtceu.api.recipe.GTRecipe;
-import com.gregtechceu.gtceu.api.recipe.RecipeHandler;
 import com.gregtechceu.gtceu.api.recipe.RecipeHelper;
 import com.gregtechceu.gtceu.common.data.GTBlocks;
 import com.gregtechceu.gtceu.common.data.GTItems;
@@ -357,7 +356,7 @@ public class MinerLogic extends RecipeLogic implements IRecipeCapabilityHolder {
         }
         outputItemHandler.storage.onContentsChanged(0);
 
-        var matches = machine.getRecipeType().searchRecipe(this, r -> RecipeHandler.matchContents(this, r).isSuccess());
+        var matches = machine.getRecipeType().searchRecipe(this, r -> RecipeHelper.matchContents(this, r).isSuccess());
 
         while (matches != null && matches.hasNext()) {
             GTRecipe match = matches.next();
@@ -365,7 +364,7 @@ public class MinerLogic extends RecipeLogic implements IRecipeCapabilityHolder {
 
             var eut = RecipeHelper.getInputEUt(match);
             if (GTUtil.getTierByVoltage(eut) <= getVoltageTier()) {
-                if (RecipeHandler.handleRecipeIO(IO.OUT, this, match, this.chanceCaches).isSuccess()) {
+                if (RecipeHelper.handleRecipeIO(IO.OUT, this, match, this.chanceCaches).isSuccess()) {
                     blockDrops.clear();
                     var result = new ArrayList<ItemStack>();
                     for (int i = 0; i < outputItemHandler.storage.getSlots(); ++i) {

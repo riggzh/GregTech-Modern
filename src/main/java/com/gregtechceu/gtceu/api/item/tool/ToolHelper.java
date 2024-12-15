@@ -14,7 +14,7 @@ import com.gregtechceu.gtceu.api.item.tool.aoe.AoESymmetrical;
 import com.gregtechceu.gtceu.api.machine.trait.NotifiableItemStackHandler;
 import com.gregtechceu.gtceu.api.machine.trait.RecipeHandlerList;
 import com.gregtechceu.gtceu.api.recipe.GTRecipe;
-import com.gregtechceu.gtceu.api.recipe.RecipeHandler;
+import com.gregtechceu.gtceu.api.recipe.RecipeHelper;
 import com.gregtechceu.gtceu.api.recipe.content.Content;
 import com.gregtechceu.gtceu.api.recipe.ingredient.SizedIngredient;
 import com.gregtechceu.gtceu.common.data.GTItems;
@@ -425,9 +425,9 @@ public class ToolHelper {
                 be.getMetaMachine().reinitializeCapabilities(caps);
 
                 Iterator<GTRecipe> hammerRecipes = GTRecipeTypes.FORGE_HAMMER_RECIPES.searchRecipe(be.metaMachine,
-                        r -> RecipeHandler.matchContents(be.metaMachine, r).isSuccess());
+                        r -> RecipeHelper.matchContents(be.metaMachine, r).isSuccess());
                 GTRecipe hammerRecipe = hammerRecipes == null || !hammerRecipes.hasNext() ? null : hammerRecipes.next();
-                if (hammerRecipe != null && RecipeHandler.handleRecipeIO(IO.IN, be.metaMachine, hammerRecipe,
+                if (hammerRecipe != null && RecipeHelper.handleRecipeIO(IO.IN, be.metaMachine, hammerRecipe,
                         be.getMetaMachine().recipeLogic.getChanceCaches()).isSuccess()) {
                     drops.clear();
                     TagPrefix prefix = ChemicalHelper.getPrefix(silktouchDrop.getItem());

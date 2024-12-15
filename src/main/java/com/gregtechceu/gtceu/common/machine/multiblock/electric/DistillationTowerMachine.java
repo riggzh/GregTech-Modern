@@ -9,7 +9,7 @@ import com.gregtechceu.gtceu.api.machine.multiblock.WorkableElectricMultiblockMa
 import com.gregtechceu.gtceu.api.machine.trait.NotifiableFluidTank;
 import com.gregtechceu.gtceu.api.machine.trait.RecipeLogic;
 import com.gregtechceu.gtceu.api.recipe.GTRecipe;
-import com.gregtechceu.gtceu.api.recipe.RecipeHandler;
+import com.gregtechceu.gtceu.api.recipe.RecipeHelper;
 import com.gregtechceu.gtceu.api.recipe.content.Content;
 import com.gregtechceu.gtceu.api.recipe.content.ContentModifier;
 import com.gregtechceu.gtceu.api.recipe.modifier.ParallelLogic;
@@ -189,26 +189,26 @@ public class DistillationTowerMachine extends WorkableElectricMultiblockMachine
         }
 
         @Override
-        public RecipeHandler.ActionResult checkRecipe(GTRecipe recipe) {
-            var result = RecipeHandler.handleRecipe(IO.IN, machine, recipe, recipe.inputs, Collections.emptyMap(),
+        public RecipeHelper.ActionResult checkRecipe(GTRecipe recipe) {
+            var result = RecipeHelper.handleRecipe(IO.IN, machine, recipe, recipe.inputs, Collections.emptyMap(),
                     false, true);
             if (!result.isSuccess()) return result;
 
             var items = recipe.getOutputContents(ItemRecipeCapability.CAP);
             if (!items.isEmpty()) {
                 Map<RecipeCapability<?>, List<Content>> out = Map.of(ItemRecipeCapability.CAP, items);
-                result = RecipeHandler.handleRecipe(IO.OUT, machine, recipe, out, Collections.emptyMap(), false, true);
+                result = RecipeHelper.handleRecipe(IO.OUT, machine, recipe, out, Collections.emptyMap(), false, true);
                 if (!result.isSuccess()) return result;
             }
 
             if (!applyFluidOutputs(recipe, FluidAction.SIMULATE)) {
-                return RecipeHandler.ActionResult
+                return RecipeHelper.ActionResult
                         .fail(() -> Component.translatable("gtceu.recipe_logic.insufficient_out")
                                 .append(": ")
                                 .append(FluidRecipeCapability.CAP.getName()));
             }
 
-            return RecipeHandler.ActionResult.SUCCESS;
+            return RecipeHelper.ActionResult.SUCCESS;
         }
 
         private void updateWorkingRecipe(GTRecipe recipe) {
@@ -228,7 +228,7 @@ public class DistillationTowerMachine extends WorkableElectricMultiblockMachine
         }
 
         @Override
-        protected RecipeHandler.ActionResult handleRecipeIO(GTRecipe recipe, IO io) {
+        protected RecipeHelper.ActionResult handleRecipeIO(GTRecipe recipe, IO io) {
             if (io != IO.OUT) {
                 var handleIO = super.handleRecipeIO(recipe, io);
                 if (handleIO.isSuccess()) {
@@ -241,12 +241,12 @@ public class DistillationTowerMachine extends WorkableElectricMultiblockMachine
             var items = recipe.getOutputContents(ItemRecipeCapability.CAP);
             if (!items.isEmpty()) {
                 Map<RecipeCapability<?>, List<Content>> out = Map.of(ItemRecipeCapability.CAP, items);
-                RecipeHandler.handleRecipe(io, this.machine, recipe, out, chanceCaches, false, false);
+                RecipeHelper.handleRecipe(io, this.machine, recipe, out, chanceCaches, false, false);
             }
             if (applyFluidOutputs(recipe, FluidAction.EXECUTE)) {
-                return RecipeHandler.ActionResult.SUCCESS;
+                return RecipeHelper.ActionResult.SUCCESS;
             }
-            return RecipeHandler.ActionResult.fail(() -> Component.translatable("gtceu.recipe_logic.insufficient_out")
+            return RecipeHelper.ActionResult.fail(() -> Component.translatable("gtceu.recipe_logic.insufficient_out")
                     .append(": ")
                     .append(FluidRecipeCapability.CAP.getName()));
         }

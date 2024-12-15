@@ -9,7 +9,7 @@ import com.gregtechceu.gtceu.api.data.worldgen.ores.OreGenerator;
 import com.gregtechceu.gtceu.api.data.worldgen.ores.OrePlacer;
 import com.gregtechceu.gtceu.api.gui.factory.GTUIEditorFactory;
 import com.gregtechceu.gtceu.api.recipe.GTRecipe;
-import com.gregtechceu.gtceu.api.recipe.RecipeHandler;
+import com.gregtechceu.gtceu.api.recipe.RecipeHelper;
 import com.gregtechceu.gtceu.api.registry.GTRegistries;
 import com.gregtechceu.gtceu.api.registry.GTRegistry;
 import com.gregtechceu.gtceu.common.commands.arguments.GTRegistryArgument;
@@ -67,7 +67,7 @@ public class GTCommands {
                                     for (Recipe<?> recipe : context.getSource().getServer().getRecipeManager()
                                             .getRecipes()) {
                                         if (recipe instanceof GTRecipe gtRecipe) {
-                                            var recipeValid = RecipeHandler.checkRecipeValidity(gtRecipe).stream()
+                                            var recipeValid = RecipeHelper.checkRecipeValidity(gtRecipe).stream()
                                                     .filter(v -> !v.isSuccess()).findAny();
                                             if (recipeValid.isPresent()) {
                                                 context.getSource().sendSuccess(

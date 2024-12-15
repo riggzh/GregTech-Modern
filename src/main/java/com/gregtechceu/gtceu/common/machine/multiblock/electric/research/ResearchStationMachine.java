@@ -15,8 +15,8 @@ import com.gregtechceu.gtceu.api.machine.trait.RecipeHandlerList;
 import com.gregtechceu.gtceu.api.machine.trait.RecipeLogic;
 import com.gregtechceu.gtceu.api.recipe.GTRecipe;
 import com.gregtechceu.gtceu.api.recipe.GTRecipeType;
-import com.gregtechceu.gtceu.api.recipe.RecipeHandler;
 
+import com.gregtechceu.gtceu.api.recipe.RecipeHelper;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.world.item.ItemStack;
 
@@ -123,11 +123,11 @@ public class ResearchStationMachine extends WorkableElectricMultiblockMachine im
             var iterator = machine.getRecipeType().getLookup().getRecipeIterator(holder, recipe -> {
                 if (recipe.isFuel) return false;
                 if (!holder.hasCapabilityProxies()) return false;
-                var result = RecipeHandler.handleRecipe(IO.IN, holder, recipe, recipe.inputs, Collections.emptyMap(),
+                var result = RecipeHelper.handleRecipe(IO.IN, holder, recipe, recipe.inputs, Collections.emptyMap(),
                         false, false);
                 if (!result.isSuccess()) return false;
                 if (recipe.hasTick()) {
-                    result = RecipeHandler.handleRecipe(IO.IN, holder, recipe, recipe.tickInputs,
+                    result = RecipeHelper.handleRecipe(IO.IN, holder, recipe, recipe.tickInputs,
                             Collections.emptyMap(), false, false);
                     return result.isSuccess();
                 }
@@ -161,7 +161,7 @@ public class ResearchStationMachine extends WorkableElectricMultiblockMachine im
                     return true;
                 }
                 // skip "can fit" checks, it can always fit
-                var conditions = RecipeHandler.checkConditions(modified, this).stream().filter(v -> !v.isSuccess())
+                var conditions = RecipeHelper.checkConditions(modified, this).stream().filter(v -> !v.isSuccess())
                         .findFirst();
                 if (conditions.isEmpty() &&
                         this.matchRecipeNoOutput(modified, machine).isSuccess() &&
@@ -177,20 +177,20 @@ public class ResearchStationMachine extends WorkableElectricMultiblockMachine im
             return false;
         }
 
-        public RecipeHandler.ActionResult matchRecipeNoOutput(GTRecipe recipe, IRecipeCapabilityHolder holder) {
-            if (!holder.hasCapabilityProxies()) return RecipeHandler.ActionResult.FAIL_NO_CAPABILITIES;
-            return RecipeHandler.handleRecipe(IO.IN, holder, recipe, recipe.inputs, Collections.emptyMap(), false,
+        public RecipeHelper.ActionResult matchRecipeNoOutput(GTRecipe recipe, IRecipeCapabilityHolder holder) {
+            if (!holder.hasCapabilityProxies()) return RecipeHelper.ActionResult.FAIL_NO_CAPABILITIES;
+            return RecipeHelper.handleRecipe(IO.IN, holder, recipe, recipe.inputs, Collections.emptyMap(), false,
                     true);
         }
 
-        public RecipeHandler.ActionResult matchTickRecipeNoOutput(GTRecipe recipe, IRecipeCapabilityHolder holder) {
+        public RecipeHelper.ActionResult matchTickRecipeNoOutput(GTRecipe recipe, IRecipeCapabilityHolder holder) {
             if (recipe.hasTick()) {
                 if (!holder.hasCapabilityProxies())
-                    return RecipeHandler.ActionResult.FAIL_NO_CAPABILITIES;
-                return RecipeHandler.handleRecipe(IO.IN, holder, recipe, recipe.tickInputs, Collections.emptyMap(),
+                    return RecipeHelper.ActionResult.FAIL_NO_CAPABILITIES;
+                return RecipeHelper.handleRecipe(IO.IN, holder, recipe, recipe.tickInputs, Collections.emptyMap(),
                         false, true);
             }
-            return RecipeHandler.ActionResult.SUCCESS;
+            return RecipeHelper.ActionResult.SUCCESS;
         }
 
         @Override
@@ -203,7 +203,7 @@ public class ResearchStationMachine extends WorkableElectricMultiblockMachine im
             if (!machine.beforeWorking(recipe)) {
                 return;
             }
-            RecipeHandler.preWorking(this.machine, recipe);
+            RecipeHelper.preWorking(this.machine, recipe);
 
             // do not consume inputs here, consume them on completion
             recipeDirty = false;
@@ -231,19 +231,19 @@ public class ResearchStationMachine extends WorkableElectricMultiblockMachine im
         }
 
         @Override
-        protected RecipeHandler.ActionResult handleRecipeIO(GTRecipe recipe, IO io) {
+        protected RecipeHelper.ActionResult handleRecipeIO(GTRecipe recipe, IO io) {
             if (io != IO.OUT) {
                 return super.handleRecipeIO(recipe, io);
             }
-            return RecipeHandler.ActionResult.SUCCESS;
+            return RecipeHelper.ActionResult.SUCCESS;
         }
 
         @Override
-        protected RecipeHandler.ActionResult handleTickRecipeIO(GTRecipe recipe, IO io) {
+        protected RecipeHelper.ActionResult handleTickRecipeIO(GTRecipe recipe, IO io) {
             if (io != IO.OUT) {
                 return super.handleTickRecipeIO(recipe, io);
             }
-            return RecipeHandler.ActionResult.SUCCESS;
+            return RecipeHelper.ActionResult.SUCCESS;
         }
     }
 }
