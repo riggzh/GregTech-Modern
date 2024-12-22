@@ -104,25 +104,43 @@ public class LargeCombustionEngineMachine extends WorkableElectricMultiblockMach
         return GTRecipeBuilder.ofRaw().inputFluids(isExtreme() ? LIQUID_OXYGEN_STACK : OXYGEN_STACK).buildRawRecipe();
     }
 
-    @Nullable
-    public static GTRecipe recipeModifier(MetaMachine machine, @NotNull GTRecipe recipe, @NotNull OCParams params,
-                                          @NotNull OCResult result) {
-        if (machine instanceof LargeCombustionEngineMachine engineMachine) {
-            var EUt = RecipeHelper.getOutputEUt(recipe);
-            // has lubricant
-            if (EUt > 0 && RecipeHelper.matchRecipe(engineMachine, engineMachine.getLubricantRecipe()).isSuccess() &&
-                    !engineMachine.isIntakesObstructed()) {
-                var maxParallel = (int) (engineMachine.getOverclockVoltage() / EUt); // get maximum parallel
-                var parallelResult = GTRecipeModifiers.fastParallel(engineMachine, recipe, maxParallel, false);
-                if (engineMachine.isOxygenBoosted) { // boost production
-                    long eut = (long) (EUt * parallelResult.getSecond() * (engineMachine.isExtreme() ? 2 : 1.5));
-                    result.init(-eut, recipe.duration, 1, params.getOcAmount());
-                } else {
-                    long eut = (long) (EUt * parallelResult.getSecond());
-                    result.init(-eut, recipe.duration, 1, params.getOcAmount());
-                }
-                return recipe;
-            }
+    /**
+     * @return EUt multiplier that should be applied to the engine's output
+     */
+    protected double getProductionBoost() {
+        if (!isOxygenBoosted) return 1;
+        return isExtreme() ? 2.0 : 1.5;
+    }
+
+    /**
+     * Recipe Modifier for <b>Combustion Engine Multiblocks</b> - can be used as a valid {@link RecipeModifier}
+     * <p>
+     * Recipe is rejected if the machine's intakes are obstructed or if it doesn't have lubricant<br>
+     * Recipe is parallelized up to {@code desiredEUt / recipeEUt} times.
+     * EUt is further multiplied by the production boost of the engine.
+     *
+     * @param machine a {@link LargeCombustionEngineMachine}
+     * @param recipe  recipe
+     * @return A {@link ModifierFunction} for the given Combustion Engine
+     */
+    public static ModifierFunction recipeModifier(@NotNull MetaMachine machine, @NotNull GTRecipe recipe) {
+        if (!(machine instanceof LargeCombustionEngineMachine engineMachine)) {
+            return RecipeModifier.nullWrongType(LargeCombustionEngineMachine.class, machine);
+        }
+        long EUt = RecipeHelper.getOutputEUt(recipe);
+        // has lubricant
+        if (EUt > 0 && !engineMachine.isIntakesObstructed() &&
+                RecipeHelper.matchRecipe(engineMachine, engineMachine.getLubricantRecipe()).isSuccess()) {
+            int maxParallel = (int) (engineMachine.getOverclockVoltage() / EUt); // get maximum parallel
+            int actualParallel = ParallelLogic.getParallelAmount(engineMachine, recipe, maxParallel);
+            double eutMultiplier = actualParallel * engineMachine.getProductionBoost();
+
+            return ModifierFunction.builder()
+                    .inputModifier(ContentModifier.multiplier(actualParallel))
+                    .outputModifier(ContentModifier.multiplier(actualParallel))
+                    .eutMultiplier(eutMultiplier)
+                    .parallels(actualParallel)
+                    .build();
         }
         return null;
     }

@@ -69,6 +69,39 @@ public class EURecipeCapability extends RecipeCapability<Long> {
         if (recipeEUt == 0) {
             return Integer.MAX_VALUE;
         }
-        return Math.abs(Ints.saturatedCast(maxVoltage / recipeEUt));
+        return Math.abs(GTMath.saturatedCast(maxVoltage / recipeEUt));
+    }
+
+    /**
+     * Creates a {@code List<Content>} with the specified EU
+     * 
+     * @param eu EU/t value to put in the Content
+     * @return Singleton list of a new Content with the given EU value
+     */
+    public static List<Content> makeEUContent(Long eu) {
+        return List.of(
+                new Content(eu, ChanceLogic.getMaxChancedValue(), ChanceLogic.getMaxChancedValue(), 0));
+    }
+
+    /**
+     * Puts an EU Singleton Content in the given content map
+     * 
+     * @param contents content map
+     * @param eu       EU value to put inside content map
+     */
+    public static void putEUContent(Map<RecipeCapability<?>, List<Content>> contents, long eu) {
+        contents.put(EURecipeCapability.CAP, makeEUContent(eu));
+    }
+
+    public interface ICustomParallel {
+
+        /**
+         * Custom impl of the parallel limiter used by ParallelLogic to limit by outputs
+         * 
+         * @param recipe     Recipe
+         * @param multiplier Initial multiplier
+         * @return Limited multiplier
+         */
+        int limitParallel(GTRecipe recipe, int multiplier);
     }
 }

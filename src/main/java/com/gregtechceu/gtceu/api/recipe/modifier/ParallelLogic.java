@@ -4,6 +4,7 @@ import com.gregtechceu.gtceu.api.capability.recipe.*;
 import com.gregtechceu.gtceu.api.machine.MetaMachine;
 import com.gregtechceu.gtceu.api.machine.feature.IRecipeLogicMachine;
 import com.gregtechceu.gtceu.api.recipe.GTRecipe;
+import com.gregtechceu.gtceu.api.recipe.RecipeHelper;
 import com.gregtechceu.gtceu.api.recipe.content.ContentModifier;
 
 import net.minecraft.MethodsReturnNonnullByDefault;
@@ -191,15 +192,13 @@ public class ParallelLogic {
             return Pair.of(currentRecipe, 1);
         }
 
-        // Simulate the merging of the maximum amount of recipes that can be run with these items
-        // and limit by the amount we can successfully merge
-        int limitByOutput = ParallelLogic.limitByOutputMerging(currentRecipe, machine, multiplierByInputs,
-                machine::canVoidRecipeOutputs);
-        GTRecipe multiRecipe;
-        if (limitByOutput > 0) {
-            multiRecipe = currentRecipe.copy(ContentModifier.multiplier(limitByOutput), modifyDuration);
-            multiRecipe.parallels = limitByOutput;
-            return Pair.of(multiRecipe, limitByOutput);
+        while (parallelLimit > 0) {
+            var copied = recipe.copy(ContentModifier.multiplier(parallelLimit), false);
+            if (RecipeHelper.matchRecipe(holder, copied).isSuccess() &&
+                    RecipeHelper.matchTickRecipe(holder, copied).isSuccess()) {
+                return parallelLimit;
+            }
+            parallelLimit /= 2;
         }
 
         return Pair.of(currentRecipe, limitByOutput);

@@ -7,8 +7,6 @@ import com.gregtechceu.gtceu.api.machine.trait.RecipeLogic;
 import com.gregtechceu.gtceu.api.recipe.GTRecipe;
 import com.gregtechceu.gtceu.api.recipe.GTRecipeType;
 import com.gregtechceu.gtceu.api.recipe.RecipeHelper;
-import com.gregtechceu.gtceu.api.recipe.logic.OCParams;
-import com.gregtechceu.gtceu.api.recipe.logic.OCResult;
 import com.gregtechceu.gtceu.config.ConfigHolder;
 
 import org.jetbrains.annotations.NotNull;
@@ -64,7 +62,7 @@ public interface IRecipeLogicMachine extends IRecipeCapabilityHolder, IMachineFe
 
     /**
      * Override it to modify recipe on the fly e.g. applying overclock, change chance, etc
-     * 
+     *
      * @param recipe recipe from detected from GTRecipeType
      * @return modified recipe.
      *         null -- this recipe is unavailable
