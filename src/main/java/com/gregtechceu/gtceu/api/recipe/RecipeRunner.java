@@ -10,6 +10,7 @@ import com.gregtechceu.gtceu.api.recipe.content.Content;
 import com.gregtechceu.gtceu.api.recipe.content.ContentModifier;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
@@ -22,7 +23,7 @@ import java.util.*;
 class RecipeRunner {
 
     record RecipeHandlingResult(@Nullable RecipeCapability<?> capability, @UnknownNullability List content,
-                                RecipeHelper.ActionResult result) {}
+                                ActionResult result) {}
 
     private final GTRecipe recipe;
     private final IO io;
@@ -41,18 +42,17 @@ class RecipeRunner {
         this.isTick = isTick;
         this.chanceCaches = chanceCaches;
         this.capabilityProxies = holder.getCapabilitiesProxy();
-        this.recipeContents = new IdentityHashMap<>();
-        this.searchRecipeContents = simulated ? recipeContents : new IdentityHashMap<>();
+        this.recipeContents = new Reference2ObjectOpenHashMap<>();
+        this.searchRecipeContents = simulated ? recipeContents : new Reference2ObjectOpenHashMap<>();
         this.simulated = simulated;
     }
-
 
     @Nullable
     public RecipeHandlingResult handle(Map<RecipeCapability<?>, List<Content>> entries) {
         fillContentMatchList(entries);
 
         if (searchRecipeContents.isEmpty())
-            return new RecipeHandlingResult(null, null, RecipeHelper.ActionResult.PASS_NO_CONTENTS);
+            return new RecipeHandlingResult(null, null, ActionResult.PASS_NO_CONTENTS);
 
         return this.handleContents();
     }
@@ -106,10 +106,9 @@ class RecipeRunner {
         }
     }
 
-    @Nullable
     private RecipeHandlingResult handleContents() {
         if (recipeContents.isEmpty()) {
-            return new RecipeHandlingResult(null, null, RecipeHelper.ActionResult.SUCCESS);
+            return new RecipeHandlingResult(null, null, ActionResult.SUCCESS);
         }
         var result = handleContentsInternal(io);
         if (!result.result.isSuccess()) {
@@ -120,19 +119,16 @@ class RecipeRunner {
 
     private RecipeHandlingResult handleContentsInternal(IO capIO) {
         if (!capabilityProxies.containsKey(capIO))
-            return new RecipeHandlingResult(null, null, RecipeHelper.ActionResult.SUCCESS);
+            return new RecipeHandlingResult(null, null, ActionResult.SUCCESS);
 
-        // noinspection DataFlowIssue checked above.
-        var handlers = new ArrayList<>(capabilityProxies.get(capIO));
-        List<RecipeHandlerList> distinct = new ArrayList<>(), nondistinct = new ArrayList<>();
+        var handlers = capabilityProxies.get(capIO);
+        handlers.sort(RecipeHandlerList.COMPARATOR.reversed());
+        List<RecipeHandlerList> distinct = new ArrayList<>();
+        List<RecipeHandlerList> indistinct = new ArrayList<>();
         for (var handler : handlers) {
-            if (handler.isDistinct())
-                distinct.add(handler);
-            else
-                nondistinct.add(handler);
+            if (handler.isDistinct()) distinct.add(handler);
+            else indistinct.add(handler);
         }
-
-        // handlers.sort(IRecipeHandler.ENTRY_COMPARATOR);
 
         // handle distinct first
         boolean handled = false;
@@ -148,7 +144,7 @@ class RecipeRunner {
         }
 
         if (!handled) {
-            for (var handler : nondistinct) {
+            for (var handler : indistinct) {
                 if (!recipeContents.isEmpty()) {
                     recipeContents = handler.handleRecipe(io, recipe, recipeContents, simulated);
                 }
@@ -172,16 +168,16 @@ class RecipeRunner {
         }
 
         if (handled) {
-            return new RecipeHandlingResult(null, null, RecipeHelper.ActionResult.SUCCESS);
+            return new RecipeHandlingResult(null, null, ActionResult.SUCCESS);
         }
 
         for (var entry : recipeContents.entrySet()) {
             if (entry.getValue() != null && !entry.getValue().isEmpty()) {
                 return new RecipeHandlingResult(entry.getKey(), entry.getValue(),
-                        RecipeHelper.ActionResult.FAIL_NO_REASON);
+                        ActionResult.FAIL_NO_REASON);
             }
         }
 
-        return new RecipeHandlingResult(null, null, RecipeHelper.ActionResult.FAIL_NO_REASON);
+        return new RecipeHandlingResult(null, null, ActionResult.FAIL_NO_REASON);
     }
 }

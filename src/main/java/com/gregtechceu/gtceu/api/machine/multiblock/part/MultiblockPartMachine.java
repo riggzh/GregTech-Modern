@@ -19,7 +19,6 @@ import net.minecraft.server.level.ServerLevel;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -79,14 +78,16 @@ public class MultiblockPartMachine extends MetaMachine implements IMultiPart {
 
     public RecipeHandlerList getRecipeHandlers() {
         if (handlerList == null) {
-            var a = traits.stream().filter(IRecipeHandlerTrait.class::isInstance).map(IRecipeHandlerTrait.class::cast)
+            var a = traits.stream()
+                    .filter(IRecipeHandlerTrait.class::isInstance)
+                    .map(IRecipeHandlerTrait.class::cast)
                     .toList();
             if (a.isEmpty()) {
                 handlerList = new RecipeHandlerList(IO.NONE);
                 return handlerList;
             }
             handlerList = new RecipeHandlerList(a.get(0).getHandlerIO());
-            handlerList.addHandler(a.toArray(new IRecipeHandler[0]));
+            handlerList.addHandlers(a.toArray(new IRecipeHandler[0]));
         }
         return handlerList;
     }

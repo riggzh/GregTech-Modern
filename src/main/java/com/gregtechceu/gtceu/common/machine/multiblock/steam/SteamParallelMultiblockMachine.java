@@ -34,9 +34,7 @@ import net.minecraft.world.entity.player.Player;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
@@ -56,8 +54,7 @@ public class SteamParallelMultiblockMachine extends WorkableMultiblockMachine im
     @Override
     public void onStructureFormed() {
         super.onStructureFormed();
-        var handlers = capabilitiesProxy.get(IO.IN).stream()
-                .flatMap(rhl -> rhl.getCapability(FluidRecipeCapability.CAP).stream()).collect(Collectors.toList());
+        var handlers = getCapabilitiesFlat(IO.IN, FluidRecipeCapability.CAP);
         if (handlers.isEmpty()) return;
         var itr = handlers.iterator();
         while (itr.hasNext()) {
@@ -65,8 +62,8 @@ public class SteamParallelMultiblockMachine extends WorkableMultiblockMachine im
             if (handler instanceof NotifiableFluidTank tank) {
                 if (tank.isFluidValid(0, GTMaterials.Steam.getFluid(1))) {
                     itr.remove();
-                    capabilitiesProxy.computeIfAbsent(IO.IN, c -> new ArrayList<>())
-                            .add(RecipeHandlerList.of(IO.IN, new SteamEnergyRecipeHandler(tank, CONVERSION_RATE)));
+                    this.addHandlerList(
+                            RecipeHandlerList.of(IO.IN, new SteamEnergyRecipeHandler(tank, CONVERSION_RATE)));
                     /*
                      * if (!capabilitiesProxy.contains(IO.IN, EURecipeCapability.CAP)) {
                      * capabilitiesProxy.put(IO.IN, EURecipeCapability.CAP, new ArrayList<>());
@@ -97,8 +94,7 @@ public class SteamParallelMultiblockMachine extends WorkableMultiblockMachine im
     public void addDisplayText(List<Component> textList) {
         IDisplayUIMachine.super.addDisplayText(textList);
         if (isFormed()) {
-            var handlers = capabilitiesProxy.get(IO.IN).stream()
-                    .flatMap(rhl -> rhl.getCapability(EURecipeCapability.CAP).stream()).toList();
+            var handlers = getCapabilitiesFlat(IO.IN, EURecipeCapability.CAP);
             if (!handlers.isEmpty() && handlers.get(0) instanceof SteamEnergyRecipeHandler steamHandler) {
                 if (steamHandler.getCapacity() > 0) {
                     long steamStored = steamHandler.getStored();
