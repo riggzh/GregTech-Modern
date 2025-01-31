@@ -169,7 +169,7 @@ public class DualHatchPartMachine extends ItemBusPartMachine {
     public void setDistinct(boolean isDistinct) {
         super.setDistinct(isDistinct);
         tank.setDistinct(isDistinct);
-        getRecipeHandlers().setDistinct(isDistinct);
+        getRecipeHandlers().get(0).setDistinct(isDistinct);
     }
 
     @Override

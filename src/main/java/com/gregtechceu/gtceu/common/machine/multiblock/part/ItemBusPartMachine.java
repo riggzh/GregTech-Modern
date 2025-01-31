@@ -115,7 +115,7 @@ public class ItemBusPartMachine extends TieredIOPartMachine implements IDistinct
             serverLevel.getServer().tell(new TickTask(0, this::updateInventorySubscription));
         }
         inventorySubs = getInventory().addChangedListener(this::updateInventorySubscription);
-        getRecipeHandlers().setDistinct(getInventory().isDistinct());
+        getRecipeHandlers().get(0).setDistinct(getInventory().isDistinct());
     }
 
     @Override
@@ -136,7 +136,7 @@ public class ItemBusPartMachine extends TieredIOPartMachine implements IDistinct
     public void setDistinct(boolean isDistinct) {
         getInventory().setDistinct(isDistinct);
         circuitInventory.setDistinct(isDistinct);
-        getRecipeHandlers().setDistinct(isDistinct);
+        getRecipeHandlers().get(0).setDistinct(isDistinct);
     }
 
     //////////////////////////////////////
