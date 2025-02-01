@@ -18,6 +18,7 @@ import net.minecraft.server.level.ServerLevel;
 
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ReferenceLinkedOpenHashSet;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.Collections;
@@ -42,7 +43,7 @@ public class MultiblockPartMachine extends MetaMachine implements IMultiPart {
     @RequireRerender
     protected final Set<BlockPos> controllerPositions;
 
-    protected RecipeHandlerList handlerList;
+    protected @Nullable RecipeHandlerList handlerList;
 
     public MultiblockPartMachine(IMachineBlockEntity holder) {
         super(holder);
