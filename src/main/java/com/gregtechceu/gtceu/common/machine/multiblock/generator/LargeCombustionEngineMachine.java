@@ -152,7 +152,7 @@ public class LargeCombustionEngineMachine extends WorkableElectricMultiblockMach
         val totalContinuousRunningTime = recipeLogic.getTotalContinuousRunningTime();
         if ((totalContinuousRunningTime == 1 || totalContinuousRunningTime % 72 == 0)) {
             // insufficient lubricant
-            if (RecipeHelper.handleRecipeIO(IO.IN, this, getLubricantRecipe(), this.recipeLogic.getChanceCaches())
+            if (RecipeHelper.handleRecipeIO(this, getLubricantRecipe(), IO.IN, this.recipeLogic.getChanceCaches())
                     .isSuccess()) {
                 recipeLogic.interruptRecipe();
                 return false;
@@ -162,7 +162,7 @@ public class LargeCombustionEngineMachine extends WorkableElectricMultiblockMach
         if ((totalContinuousRunningTime == 1 || totalContinuousRunningTime % 20 == 0) && isBoostAllowed()) {
             var boosterRecipe = getBoostRecipe();
             this.isOxygenBoosted = RecipeHelper.matchRecipe(this, boosterRecipe).isSuccess() &&
-                    RecipeHelper.handleRecipeIO(IO.IN, this, boosterRecipe, this.recipeLogic.getChanceCaches())
+                    RecipeHelper.handleRecipeIO(this, boosterRecipe, IO.IN, this.recipeLogic.getChanceCaches())
                             .isSuccess();
         }
         return value;
