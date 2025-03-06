@@ -122,12 +122,25 @@ public class LargeBoilerMachine extends WorkableMultiblockMachine implements IEx
             List<IRecipeHandler<?>> inputTanks = new ArrayList<>();
             inputTanks.addAll(getCapabilitiesFlat(IO.IN, FluidRecipeCapability.CAP));
             inputTanks.addAll(getCapabilitiesFlat(IO.BOTH, FluidRecipeCapability.CAP));
-            for (IRecipeHandler<?> tank : inputTanks) {
-                drainWater = (List<FluidIngredient>) tank.handleRecipe(IO.IN, null, drainWater, false);
-                if (drainWater == null) break;
-            }
-            var drained = (drainWater == null || drainWater.isEmpty()) ? maxDrain :
-                    maxDrain - drainWater.get(0).getAmount();
+            if (currentTemperature < 100) {
+                steamGenerated = 0;
+                for (IRecipeHandler<?> tank : inputTanks) {
+                    drainWater = (List<FluidIngredient>) tank.handleRecipe(IO.IN, null, drainWater, true);
+                    this.hasNoWater = !(drainWater == null || drainWater.isEmpty() ||
+                            drainWater.get(0).getAmount() > 0);
+                    if (!this.hasNoWater) {
+                        break;
+                    }
+                }
+            } else {
+                for (IRecipeHandler<?> tank : inputTanks) {
+                    drainWater = (List<FluidIngredient>) tank.handleRecipe(IO.IN, null, drainWater, false);
+                    if (drainWater == null || drainWater.isEmpty()) {
+                        break;
+                    }
+                }
+                var drained = (drainWater == null || drainWater.isEmpty()) ? maxDrain :
+                        maxDrain - drainWater.get(0).getAmount();
 
             boolean hasDrainedWater = drained > 0;
             steamGenerated = drained * ConfigHolder.INSTANCE.machines.largeBoilers.steamPerWater;
