@@ -25,10 +25,10 @@ import org.jetbrains.annotations.Nullable;
 public class Content {
 
     @Getter
-    public Object content;
-    public int chance;
-    public int maxChance;
-    public int tierChanceBoost;
+    public final Object content;
+    public final int chance;
+    public final int maxChance;
+    public final int tierChanceBoost;
 
     public Content(Object content, int chance, int maxChance, int tierChanceBoost) {
         this.content = content;
@@ -59,6 +59,10 @@ public class Content {
 
     public Content copyExplicit(RecipeCapability<?> capability, @Nullable ContentModifier modifier) {
         return new Content(capability.copyContent(content, modifier), chance, maxChance, tierChanceBoost);
+    }
+
+    public boolean isChanced() {
+        return chance > 0 && chance < maxChance;
     }
 
     /**

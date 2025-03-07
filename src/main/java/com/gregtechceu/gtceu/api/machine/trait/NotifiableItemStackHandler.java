@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * @author KilaBash
@@ -67,7 +68,7 @@ public class NotifiableItemStackHandler extends NotifiableRecipeHandlerTrait<Ing
         this(machine, slots, handlerIO, handlerIO);
     }
 
-    public NotifiableItemStackHandler setFilter(Function<ItemStack, Boolean> filter) {
+    public NotifiableItemStackHandler setFilter(Predicate<ItemStack> filter) {
         this.storage.setFilter(filter);
         return this;
     }

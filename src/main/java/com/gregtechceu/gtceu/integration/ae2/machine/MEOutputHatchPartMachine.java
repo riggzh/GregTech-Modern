@@ -198,17 +198,5 @@ public class MEOutputHatchPartMachine extends MEHatchPartMachine implements IMac
         public boolean supportsDrain(int tank) {
             return false;
         }
-
-        @Override
-        public FluidStorage copy() {
-            // because recipe testing uses copy transfer instead of simulated operations
-            return new FluidStorageDelegate() {
-
-                @Override
-                public long fill(int tank, FluidStack resource, boolean simulate, boolean notifyChanges) {
-                    return super.fill(tank, resource, true, notifyChanges);
-                }
-            };
-        }
     }
 }
