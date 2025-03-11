@@ -437,7 +437,6 @@ public class GTRecipeLookup {
             var handlers = entry.getValue();
             if (!cap.isRecipeSearchFilter()) continue;
             for (var handler : handlers) {
-                if (handler.isProxy()) continue;
                 var compressed = cap.compressIngredients(handler.getContents());
                 list.addAll(cap.convertCompressedIngredients(compressed));
             }

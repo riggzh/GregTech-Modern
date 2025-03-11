@@ -109,7 +109,7 @@ public interface IMultiPart extends IMachineFeature, IFancyUIMachine {
     }
 
     /**
-     * Called in {@link RecipeLogic#setupRecipe(GTRecipe)} ()}
+     * Called in {@link RecipeLogic#setupRecipe(GTRecipe)}
      */
     default boolean beforeWorking(IWorkableMultiController controller) {
         return true;
