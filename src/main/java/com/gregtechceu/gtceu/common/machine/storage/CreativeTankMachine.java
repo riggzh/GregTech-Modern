@@ -77,6 +77,71 @@ public class CreativeTankMachine extends QuantumTankMachine {
     }
 
     @Override
+    public long getStoredAmount() {
+        return (long) Math.ceil(1d * mBPerCycle / ticksPerCycle);
+    }
+
+    private InteractionResult updateStored(FluidStack fluid) {
+        stored = new FluidStack(fluid, 1000);
+        onFluidChanged();
+        return InteractionResult.SUCCESS;
+    }
+
+    private void setTicksPerCycle(String value) {
+        if (value.isEmpty()) return;
+        ticksPerCycle = Integer.parseInt(value);
+        onFluidChanged();
+    }
+
+    private void setmBPerCycle(String value) {
+        if (value.isEmpty()) return;
+        mBPerCycle = Integer.parseInt(value);
+        onFluidChanged();
+    }
+
+    @Override
+    public InteractionResult onUse(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand,
+                                   BlockHitResult hit) {
+        var heldItem = player.getItemInHand(hand);
+        if (hit.getDirection() == getFrontFacing() && !isRemote()) {
+            // Clear fluid if empty + shift-rclick
+            if (heldItem.isEmpty()) {
+                if (player.isCrouching() && !stored.isEmpty()) {
+                    return updateStored(FluidStack.EMPTY);
+                }
+                return InteractionResult.PASS;
+            }
+
+            // If no fluid set and held-item has fluid, set fluid
+            if (stored.isEmpty()) {
+                return FluidUtil.getFluidContained(heldItem)
+                        .map(this::updateStored)
+                        .orElse(InteractionResult.PASS);
+            }
+
+            // Need to make a fake source to fully fill held-item since our cache only allows mbPerTick extraction
+            CustomFluidTank source = new CustomFluidTank(new FluidStack(stored, Integer.MAX_VALUE));
+            ItemStack result = FluidUtil.tryFillContainer(heldItem, source, Integer.MAX_VALUE, player, true)
+                    .getResult();
+            if (!result.isEmpty() && heldItem.getCount() > 1) {
+                ItemHandlerHelper.giveItemToPlayer(player, result);
+                result = heldItem.copy();
+                result.shrink(1);
+            }
+
+            if (!result.isEmpty()) {
+                player.setItemInHand(hand, result);
+                return InteractionResult.SUCCESS;
+            } else {
+                return FluidUtil.getFluidContained(heldItem)
+                        .map(this::updateStored)
+                        .orElse(InteractionResult.PASS);
+            }
+        }
+        return InteractionResult.PASS;
+    }
+
+    @Override
     public WidgetGroup createUIWidget() {
         var group = new WidgetGroup(0, 0, 176, 131);
         group.addWidget(new PhantomFluidWidget(this.cache.getStorages()[0], 0, 36, 6, 18, 18,
