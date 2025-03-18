@@ -116,17 +116,13 @@ class RecipeRunner {
     }
 
     private RecipeHandlingResult handleContents() {
-        if (recipeContents.isEmpty()) {
-            return RecipeHandlingResult.SUCCESS;
-        }
         var result = handleContentsInternal(io);
-        if (!result.result.isSuccess()) {
-            return result;
-        }
+        if (result.isSuccess()) return result;
         return handleContentsInternal(IO.BOTH);
     }
 
     private RecipeHandlingResult handleContentsInternal(IO capIO) {
+        if (recipeContents.isEmpty()) return RecipeHandlingResult.SUCCESS;
         if (!capabilityProxies.containsKey(capIO)) {
             return new RecipeHandlingResult(ActionResult.FAIL_NO_CAPABILITIES, null);
         }
@@ -150,6 +146,7 @@ class RecipeRunner {
                 if (!simulated) {
                     handler.handleRecipe(io, recipe, recipeContents, false);
                 }
+                recipeContents.clear();
                 return RecipeHandlingResult.SUCCESS;
             }
         }
@@ -164,6 +161,7 @@ class RecipeRunner {
         for (var handler : distinct) {
             var res = handler.handleRecipe(io, recipe, recipeContents, simulated);
             if (res.isEmpty()) {
+                recipeContents.clear();
                 return RecipeHandlingResult.SUCCESS;
             }
         }
