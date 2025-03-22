@@ -63,7 +63,7 @@ public class ItemBusPartMachine extends TieredIOPartMachine implements IDistinct
     public ItemBusPartMachine(IMachineBlockEntity holder, int tier, IO io, Object... args) {
         super(holder, tier, io);
         this.inventory = createInventory(args);
-        this.circuitInventory = createCircuitItemHandler(io);
+        this.circuitInventory = createCircuitItemHandler(io).shouldSearchContent(false);
     }
 
     //////////////////////////////////////

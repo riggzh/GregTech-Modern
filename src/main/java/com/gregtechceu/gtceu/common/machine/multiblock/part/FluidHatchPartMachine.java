@@ -69,7 +69,7 @@ public class FluidHatchPartMachine extends TieredIOPartMachine implements IMachi
         super(holder, tier, io);
         this.slots = slots;
         this.tank = createTank(initialCapacity, slots, args);
-        this.circuitInventory = createCircuitItemHandler(io);
+        this.circuitInventory = createCircuitItemHandler(io).shouldSearchContent(false);
     }
 
     //////////////////////////////////////

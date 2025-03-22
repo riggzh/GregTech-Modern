@@ -22,6 +22,8 @@ import net.minecraft.world.item.crafting.Ingredient;
 
 import dev.latvian.mods.kubejs.recipe.ingredientaction.IngredientAction;
 import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -47,6 +49,10 @@ public class NotifiableItemStackHandler extends NotifiableRecipeHandlerTrait<Ing
     @Persisted
     @DescSynced
     public final ItemStackTransfer storage;
+    @Accessors(fluent = true)
+    @Getter
+    @Setter
+    private boolean shouldSearchContent = true;
     private Boolean isEmpty;
 
     public NotifiableItemStackHandler(MetaMachine machine, int slots, @NotNull IO handlerIO, @NotNull IO capabilityIO,
