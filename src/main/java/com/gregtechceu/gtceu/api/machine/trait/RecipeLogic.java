@@ -279,7 +279,7 @@ public class RecipeLogic extends MachineTrait implements IEnhancedManaged, IWork
         }
     }
 
-    protected Iterator<GTRecipe> searchRecipe() {
+    public @NotNull Iterator<GTRecipe> searchRecipe() {
         return machine.getRecipeType().searchRecipe(machine, r -> matchRecipe(r).isSuccess());
     }
 
@@ -299,8 +299,8 @@ public class RecipeLogic extends MachineTrait implements IEnhancedManaged, IWork
         recipeDirty = false;
     }
 
-    private void handleSearchingRecipes(Iterator<GTRecipe> matches) {
-        while (matches != null && matches.hasNext()) {
+    private void handleSearchingRecipes(@NotNull Iterator<GTRecipe> matches) {
+        while (matches.hasNext()) {
             GTRecipe match = matches.next();
             if (match == null) continue;
 
