@@ -59,7 +59,6 @@ public class MEPatternBufferProxyPartMachine extends TieredIOPartMachine impleme
         if (getLevel() instanceof ServerLevel level) {
             level.getServer().tell(new TickTask(0, () -> this.setBuffer(bufferPos)));
         }
-        for (var rhl : getRecipeHandlers()) rhl.setDistinct(true);
     }
 
     @Override
