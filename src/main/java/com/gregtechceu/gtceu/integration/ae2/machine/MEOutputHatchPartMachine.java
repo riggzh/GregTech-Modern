@@ -127,8 +127,23 @@ public class MEOutputHatchPartMachine extends MEHatchPartMachine implements IMac
         }
 
         @Override
-        public FluidStack getFluidInTank(int tank) {
-            return storage.getFluid();
+        public @NotNull List<Object> getContents() {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public double getTotalContentAmount() {
+            return 0;
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return true;
+        }
+
+        @Override
+        public @NotNull FluidStack getFluidInTank(int tank) {
+            return FluidStack.EMPTY;
         }
 
         @Override

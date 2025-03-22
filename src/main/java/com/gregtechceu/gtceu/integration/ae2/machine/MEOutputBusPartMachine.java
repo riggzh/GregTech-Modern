@@ -22,6 +22,7 @@ import net.minecraft.world.item.ItemStack;
 import appeng.api.config.Actionable;
 import appeng.api.stacks.AEItemKey;
 import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
@@ -114,6 +115,21 @@ public class MEOutputBusPartMachine extends MEBusPartMachine implements IMachine
         public InaccessibleInfiniteHandler(MetaMachine holder) {
             super(holder, 1, IO.OUT, IO.NONE, ItemStackTransferDelegate::new);
             internalBuffer.setOnContentsChanged(this::onContentsChanged);
+        }
+
+        @Override
+        public @NotNull List<Object> getContents() {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public double getTotalContentAmount() {
+            return 0;
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return true;
         }
     }
 

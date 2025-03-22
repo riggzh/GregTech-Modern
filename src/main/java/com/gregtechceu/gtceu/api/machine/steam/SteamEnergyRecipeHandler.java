@@ -11,6 +11,8 @@ import com.gregtechceu.gtceu.common.data.GTMaterials;
 
 import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -47,7 +49,7 @@ public class SteamEnergyRecipeHandler implements IRecipeHandler<Long> {
     }
 
     @Override
-    public List<Object> getContents() {
+    public @NotNull List<Object> getContents() {
         List<FluidStack> tankContents = new ArrayList<>();
         for (int i = 0; i < steamTank.getTanks(); ++i) {
             FluidStack stack = steamTank.getFluidInTank(i);
